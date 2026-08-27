@@ -1,0 +1,13 @@
+resources:
+  - type: mntner
+    name: MINHYEOK-MNT
+  - type: role
+    name: ACRO65594-RIPE
+  - type: person
+    name: MP41209-RIPE
+  - type: organisation
+    name: ORG-PMH3-RIPE
+  - type: inet6num
+    name: 2a06:9801:ff0::/44
+  - type: domain
+    name: f.f.0.1.0.8.9.6.0.a.2.ip6.arpa

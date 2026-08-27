@@ -1,0 +1,106 @@
+name: Sync RIPE resources
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 3 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-ripe-resources
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install YAML parser
+        run: python -m pip install --disable-pip-version-check PyYAML==6.0.2
+
+      - name: Fetch configured RIPE resources
+        env:
+          RIPE_API_AUTH: ${{ secrets.RIPE_API_AUTH }}
+        run: |
+          test -n "$RIPE_API_AUTH" || {
+            echo "RIPE_API_AUTH repository secret is not configured" >&2
+            exit 1
+          }
+
+          python - <<'PY' > /tmp/ripe-resources
+          import re
+          from urllib.parse import quote
+
+          import yaml
+
+          with open("resources.yml", encoding="utf-8") as config_file:
+              config = yaml.safe_load(config_file)
+
+          resources = config.get("resources", [])
+          if not resources:
+              raise ValueError("resources.yml must define at least one resource")
+
+          for resource in resources:
+              resource_type = resource["type"]
+              name = resource["name"]
+              if not re.fullmatch(r"[a-z][a-z0-9-]*", resource_type):
+                  raise ValueError(f"Invalid RIPE resource type: {resource_type!r}")
+              if not name or "\n" in name or "\t" in name:
+                  raise ValueError(f"Invalid RIPE resource name: {name!r}")
+
+              encoded_name = quote(name, safe="")
+              print(f"{resource_type}\t{encoded_name}")
+          PY
+
+          : > /tmp/ripe-expected-files
+          while IFS=$'\t' read -r type encoded_name; do
+            mkdir -p "ripe/$type"
+            destination="ripe/$type/$encoded_name.yml"
+            printf '%s\n' "$destination" >> /tmp/ripe-expected-files
+
+            curl --fail-with-body --silent --show-error \
+              --header "Authorization: Basic $RIPE_API_AUTH" \
+              --header "Accept: application/json" \
+              "https://rest.db.ripe.net/ripe/$type/$encoded_name?unfiltered" \
+              | python -c '
+          import json
+          import sys
+
+          import yaml
+
+          data = json.load(sys.stdin)
+          if not data.get("objects", {}).get("object"):
+              raise ValueError("RIPE response contains no objects")
+          yaml.safe_dump(data, sys.stdout, sort_keys=True, allow_unicode=True)
+          ' \
+              > "$destination"
+          done < /tmp/ripe-resources
+
+          while IFS= read -r tracked_file; do
+            if ! grep --fixed-strings --line-regexp --quiet \
+              "$tracked_file" /tmp/ripe-expected-files; then
+              rm -- "$tracked_file"
+            fi
+          done < <(git ls-files 'ripe/**')
+
+      - name: Commit RIPE changes
+        run: |
+          git add ripe
+          if git diff --cached --quiet; then
+            echo "No RIPE changes detected"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Track RIPE database changes"
+          git push

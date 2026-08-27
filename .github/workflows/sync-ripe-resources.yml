@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: sync-ripe-resources
+  group: ripe-database
   cancel-in-progress: false
 
 jobs:

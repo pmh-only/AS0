@@ -20,3 +20,8 @@ AS&lt;undetermined> Network Infrastructure Specs.
 - [ ] BGP upstream tunneling: bgptunnel.com, hyehost
 - [ ] BGP daemon hosting: Oracle Cloud
 - [ ] Tailscale Exit Node
+
+### Infrastructure As Code
+- [ ] RIPE Database GitOps
+- [ ] Container image for BGP Daemon
+- [ ] Able to accept peering request by Github issue

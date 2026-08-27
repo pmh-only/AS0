@@ -1,0 +1,67 @@
+objects:
+  object:
+  - attributes:
+      attribute:
+      - name: inet6num
+        value: 2a06:9801:ff0::/44
+      - name: netname
+        value: pmh_only
+      - name: descr
+        value: Minhyeok Park
+      - name: country
+        value: KR
+      - link:
+          href: https://rest.db.ripe.net/ripe/organisation/ORG-PMH3-RIPE
+          type: locator
+        name: org
+        referenced-type: organisation
+        value: ORG-PMH3-RIPE
+      - link:
+          href: https://rest.db.ripe.net/ripe/person/MP41209-RIPE
+          type: locator
+        name: admin-c
+        referenced-type: person
+        value: MP41209-RIPE
+      - link:
+          href: https://rest.db.ripe.net/ripe/person/MP41209-RIPE
+          type: locator
+        name: tech-c
+        referenced-type: person
+        value: MP41209-RIPE
+      - link:
+          href: https://rest.db.ripe.net/ripe/role/LSRA2-RIPE
+          type: locator
+        name: abuse-c
+        referenced-type: role
+        value: LSRA2-RIPE
+      - name: status
+        value: ASSIGNED
+      - link:
+          href: https://rest.db.ripe.net/ripe/mntner/LAGRANGE-AUTO-MNT
+          type: locator
+        name: mnt-by
+        referenced-type: mntner
+        value: LAGRANGE-AUTO-MNT
+      - name: created
+        value: '2026-08-26T23:19:30Z'
+      - name: last-modified
+        value: '2026-08-26T23:23:13Z'
+      - name: source
+        value: RIPE
+    link:
+      href: https://rest.db.ripe.net/ripe/inet6num/2a06:9801:ff0::/44
+      type: locator
+    primary-key:
+      attribute:
+      - name: inet6num
+        value: 2a06:9801:ff0::/44
+    source:
+      id: ripe
+    type: inet6num
+terms-and-conditions:
+  href: https://docs.db.ripe.net/terms-conditions.html
+  type: locator
+version:
+  commit-id: '9095208'
+  timestamp: '2026-08-13T10:34:42Z'
+  version: '1.124'

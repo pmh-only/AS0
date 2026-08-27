@@ -1,0 +1,64 @@
+objects:
+  object:
+  - attributes:
+      attribute:
+      - name: organisation
+        value: ORG-PMH3-RIPE
+      - name: org-name
+        value: Minhyeok Park
+      - name: org-type
+        value: OTHER
+      - name: address
+        value: 207, Maeyeong-ro, Yeongtong-gu, Suwon-si, Gyeonggi-do, Republic of
+          Korea, 16523 (Room 1208, 12F)
+      - name: country
+        value: KR
+      - name: e-mail
+        value: pmh_only@pmh.codes
+      - link:
+          href: https://rest.db.ripe.net/ripe/role/ACRO65594-RIPE
+          type: locator
+        name: abuse-c
+        referenced-type: role
+        value: ACRO65594-RIPE
+      - link:
+          href: https://rest.db.ripe.net/ripe/mntner/MINHYEOK-MNT
+          type: locator
+        name: mnt-ref
+        referenced-type: mntner
+        value: MINHYEOK-MNT
+      - link:
+          href: https://rest.db.ripe.net/ripe/mntner/lagrange_cloud-MNT
+          type: locator
+        name: mnt-ref
+        referenced-type: mntner
+        value: lagrange_cloud-MNT
+      - name: created
+        value: '2026-08-25T13:52:33Z'
+      - name: last-modified
+        value: '2026-08-26T01:40:19Z'
+      - name: source
+        value: RIPE
+      - link:
+          href: https://rest.db.ripe.net/ripe/mntner/MINHYEOK-MNT
+          type: locator
+        name: mnt-by
+        referenced-type: mntner
+        value: MINHYEOK-MNT
+    link:
+      href: https://rest.db.ripe.net/ripe/organisation/ORG-PMH3-RIPE
+      type: locator
+    primary-key:
+      attribute:
+      - name: organisation
+        value: ORG-PMH3-RIPE
+    source:
+      id: ripe
+    type: organisation
+terms-and-conditions:
+  href: https://docs.db.ripe.net/terms-conditions.html
+  type: locator
+version:
+  commit-id: '9095208'
+  timestamp: '2026-08-13T10:34:42Z'
+  version: '1.124'

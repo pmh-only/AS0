@@ -1,0 +1,45 @@
+objects:
+  object:
+  - attributes:
+      attribute:
+      - name: mntner
+        value: MINHYEOK-MNT
+      - link:
+          href: https://rest.db.ripe.net/ripe/person/MP41209-RIPE
+          type: locator
+        name: admin-c
+        referenced-type: person
+        value: MP41209-RIPE
+      - name: upd-to
+        value: pmh_only@pmh.codes
+      - name: auth
+        value: SSO pmh_only@pmh.codes
+      - link:
+          href: https://rest.db.ripe.net/ripe/mntner/MINHYEOK-MNT
+          type: locator
+        name: mnt-by
+        referenced-type: mntner
+        value: MINHYEOK-MNT
+      - name: created
+        value: '2026-08-25T13:40:44Z'
+      - name: last-modified
+        value: '2026-08-25T13:40:44Z'
+      - name: source
+        value: RIPE
+    link:
+      href: https://rest.db.ripe.net/ripe/mntner/MINHYEOK-MNT
+      type: locator
+    primary-key:
+      attribute:
+      - name: mntner
+        value: MINHYEOK-MNT
+    source:
+      id: ripe
+    type: mntner
+terms-and-conditions:
+  href: https://docs.db.ripe.net/terms-conditions.html
+  type: locator
+version:
+  commit-id: '9095208'
+  timestamp: '2026-08-13T10:34:42Z'
+  version: '1.124'

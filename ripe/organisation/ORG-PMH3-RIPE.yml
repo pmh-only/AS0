@@ -8,6 +8,8 @@ objects:
         value: Minhyeok Park
       - name: org-type
         value: OTHER
+      - name: descr
+        value: This organization is operated by automatic services.
       - name: address
         value: 207, Maeyeong-ro, Yeongtong-gu, Suwon-si, Gyeonggi-do, Republic of
           Korea, 16523 (Room 1208, 12F)

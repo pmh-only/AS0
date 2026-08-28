@@ -12,7 +12,7 @@ AS&lt;undetermined> Network Infrastructure Specs.
 - [ ] ROA
 - [ ] Announce
 
-### AWS BYOASN/BYOIP range `2a06:9801:ffa::/48`
+### AWS BYOASN/BYOIP range `2a06:9801:ffa::/48` (regional), `2a06:9801:ffb::/48` (edge)
 - [ ] ROA
 - [ ] Announce
 

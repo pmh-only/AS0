@@ -8,6 +8,8 @@ objects:
         value: pmh_only
       - name: descr
         value: Minhyeok Park
+      - name: descr
+        value: OCITOKEN::2a06:9801:ff0::/44:2cdd3dffc30f981d703d722e7ffa543215a374c3cabb4c8ddcf57e862247f659
       - name: country
         value: KR
       - link:
@@ -45,7 +47,7 @@ objects:
       - name: created
         value: '2026-08-26T23:19:30Z'
       - name: last-modified
-        value: '2026-08-26T23:23:13Z'
+        value: '2026-08-28T10:46:20Z'
       - name: source
         value: RIPE
     link:

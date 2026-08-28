@@ -9,11 +9,13 @@ AS&lt;undetermined> Network Infrastructure Specs.
 - [ ] ASN allocation: not yet
 
 ### OCI BYOASN/BYOIP range `2a06:9801:ff0::/48`, `2a06:9801:ff1::/48`, `2a06:9801:ff2::/48`
-- [ ] ROA
+- [ ] BYOIP
+- [ ] BYOASN
 - [ ] Announce
 
 ### AWS BYOASN/BYOIP range `2a06:9801:ffa::/48` (regional), `2a06:9801:ffb::/48` (edge)
-- [ ] ROA
+- [x] IPAM Pool allocation
+- [ ] BYOASN
 - [ ] Announce
 
 ### Self-announced range `2a06:9801:fff::/48`

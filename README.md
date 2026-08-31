@@ -1,12 +1,12 @@
-# AS0
-AS&lt;undetermined> Network Infrastructure Specs.
+# AS218822
+AS218822 Network Infrastructure Specs.
 
 ## Plan
 - [x] RIR: RIPE
 - [x] ASN sponsor LIR: [Lagrange](https://lagrange.cloud/products/lir)
 - [x] Stack: IPv6
 - [X] IPv6 PA range allocation: `2a06:9801:ff0::/44`
-- [ ] ASN allocation: not yet
+- [x] ASN allocation: AS218822
 
 ### OCI BYOASN/BYOIP range `2a06:9801:ff0::/48`, `2a06:9801:ff1::/48`, `2a06:9801:ff2::/48`
 - [ ] BYOIP

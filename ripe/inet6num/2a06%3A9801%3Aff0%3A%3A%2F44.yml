@@ -64,6 +64,6 @@ terms-and-conditions:
   href: https://docs.db.ripe.net/terms-conditions.html
   type: locator
 version:
-  commit-id: '9095208'
-  timestamp: '2026-08-13T10:34:42Z'
-  version: '1.124'
+  commit-id: 1a68e9a
+  timestamp: '2026-08-31T08:10:22Z'
+  version: 1.124.1

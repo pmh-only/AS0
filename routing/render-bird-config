@@ -172,7 +172,7 @@ read_zerotier_config() {
 }
 
 start_zerotier() {
-    [ -n "$zerotier_configs" ] || return
+    [ -n "$zerotier_configs" ] || return 0
 
     if [ -z "${ZEROTIER_IDENTITY_SECRET:-}" ] || [ -z "${ZEROTIER_IDENTITY_PUBLIC:-}" ]; then
         echo "ZEROTIER_IDENTITY_SECRET and ZEROTIER_IDENTITY_PUBLIC are required" >&2

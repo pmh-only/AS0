@@ -11,3 +11,10 @@ resources:
     name: 2a06:9801:ff0::/44
   - type: domain
     name: f.f.0.1.0.8.9.6.0.a.2.ip6.arpa
+  - type: route6
+    name: 2a06:9801:ff0::/44
+  - type: aut-num
+    name: AS218822
+  - type: as-set
+    name: AS218822:AS-PMHONLY
+

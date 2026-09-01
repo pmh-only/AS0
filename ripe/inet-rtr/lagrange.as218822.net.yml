@@ -1,0 +1,33 @@
+objects:
+  object:
+  - attributes:
+      attribute:
+      - name: inet-rtr
+        value: lagrange.as218822.net
+      - name: descr
+        value: AS218822 Lagrange edge router
+      - name: local-as
+        value: AS218822
+      - name: ifaddr
+        value: 103.146.103.64 masklen 32
+      - name: interface
+        value: 2a0f:85c2:101::35 masklen 128
+      - name: org
+        value: ORG-PMH3-RIPE
+      - name: admin-c
+        value: MP41209-RIPE
+      - name: tech-c
+        value: MP41209-RIPE
+      - name: notify
+        value: pmh_only@pmh.codes
+      - name: mnt-by
+        value: MINHYEOK-MNT
+      - name: source
+        value: RIPE
+    primary-key:
+      attribute:
+      - name: inet-rtr
+        value: lagrange.as218822.net
+    source:
+      id: ripe
+    type: inet-rtr

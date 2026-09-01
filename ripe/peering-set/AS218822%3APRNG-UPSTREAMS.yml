@@ -1,0 +1,47 @@
+objects:
+  object:
+  - attributes:
+      attribute:
+      - name: peering-set
+        value: AS218822:PRNG-UPSTREAMS
+      - name: descr
+        value: IPv6 upstreams and route servers for AS218822
+      - name: mp-peering
+        value: AS47272
+      - name: mp-peering
+        value: AS209533
+      - name: mp-peering
+        value: AS212895
+      - name: mp-peering
+        value: AS209735
+      - name: mp-peering
+        value: AS20473
+      - name: mp-peering
+        value: AS16509
+      - name: mp-peering
+        value: AS14618
+      - name: mp-peering
+        value: AS31898
+      - name: mp-peering
+        value: AS24381
+      - name: mp-peering
+        value: AS41051
+      - name: org
+        value: ORG-PMH3-RIPE
+      - name: admin-c
+        value: MP41209-RIPE
+      - name: tech-c
+        value: MP41209-RIPE
+      - name: notify
+        value: pmh_only@pmh.codes
+      - name: mnt-by
+        value: MINHYEOK-MNT
+      - name: source
+        value: RIPE
+    primary-key:
+      attribute:
+      - name: peering-set
+        value: AS218822:PRNG-UPSTREAMS
+    source:
+      id: ripe
+    type: peering-set

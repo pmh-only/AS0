@@ -1,0 +1,33 @@
+objects:
+  object:
+  - attributes:
+      attribute:
+      - name: inet-rtr
+        value: vultr.as218822.net
+      - name: descr
+        value: AS218822 Vultr edge router
+      - name: local-as
+        value: AS218822
+      - name: ifaddr
+        value: 158.247.230.77 masklen 32
+      - name: interface
+        value: 2401:c080:1c02:bc5:5400:6ff:fe9f:8b3e masklen 128
+      - name: org
+        value: ORG-PMH3-RIPE
+      - name: admin-c
+        value: MP41209-RIPE
+      - name: tech-c
+        value: MP41209-RIPE
+      - name: notify
+        value: pmh_only@pmh.codes
+      - name: mnt-by
+        value: MINHYEOK-MNT
+      - name: source
+        value: RIPE
+    primary-key:
+      attribute:
+      - name: inet-rtr
+        value: vultr.as218822.net
+    source:
+      id: ripe
+    type: inet-rtr

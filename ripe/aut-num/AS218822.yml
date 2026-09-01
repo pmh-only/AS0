@@ -58,12 +58,54 @@ objects:
         name: mnt-by
         referenced-type: mntner
         value: MINHYEOK-MNT
+      - name: remarks
+        value: 'NOC: https://as218822.net'
+      - name: remarks
+        value: 'Peering policy: Open'
+      - name: notify
+        value: pmh_only@pmh.codes
       - name: created
         value: '2026-08-31T07:17:22Z'
       - name: last-modified
         value: '2026-09-01T04:52:28Z'
       - name: source
         value: RIPE
+      - name: mp-import
+        value: afi ipv6.unicast from AS47272 accept ANY
+      - name: mp-export
+        value: afi ipv6.unicast to AS47272 announce AS218822
+      - name: mp-import
+        value: afi ipv6.unicast from AS209533 accept ANY
+      - name: mp-export
+        value: afi ipv6.unicast to AS209533 announce AS218822
+      - name: mp-import
+        value: afi ipv6.unicast from AS212895 accept ANY
+      - name: mp-export
+        value: afi ipv6.unicast to AS212895 announce AS218822
+      - name: mp-import
+        value: afi ipv6.unicast from AS209735 accept ANY
+      - name: mp-export
+        value: afi ipv6.unicast to AS209735 announce AS218822
+      - name: mp-import
+        value: afi ipv6.unicast from AS20473 accept ANY
+      - name: mp-export
+        value: afi ipv6.unicast to AS20473 announce AS218822
+      - name: mp-import
+        value: afi ipv6.unicast from AS16509 accept ANY
+      - name: mp-export
+        value: afi ipv6.unicast to AS16509 announce AS218822
+      - name: mp-import
+        value: afi ipv6.unicast from AS14618 accept ANY
+      - name: mp-export
+        value: afi ipv6.unicast to AS14618 announce AS218822
+      - name: mp-import
+        value: afi ipv6.unicast from AS31898 accept ANY
+      - name: mp-export
+        value: afi ipv6.unicast to AS31898 announce AS218822
+      - name: mp-import
+        value: afi ipv6.unicast from AS24381 accept ANY
+      - name: mp-export
+        value: afi ipv6.unicast to AS24381 announce AS218822
       - name: mp-import
         value: afi ipv6.unicast from AS41051 accept ANY
       - name: mp-export

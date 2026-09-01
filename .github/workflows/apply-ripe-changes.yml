@@ -124,16 +124,22 @@ jobs:
           PY
 
             IFS=$'\t' read -r resource_type encoded_name < /tmp/ripe-target
-            endpoint="https://rest.db.ripe.net/ripe/$resource_type/$encoded_name"
+            if git cat-file -e "$BEFORE_SHA:$resource_path" 2>/dev/null; then
+              method=PUT
+              endpoint="https://rest.db.ripe.net/ripe/$resource_type/$encoded_name"
+            else
+              method=POST
+              endpoint="https://rest.db.ripe.net/ripe/$resource_type"
+            fi
 
-            curl --request PUT --fail-with-body --silent --show-error \
+            curl --request "$method" --fail-with-body --silent --show-error \
               --header "Authorization: Basic $RIPE_API_AUTH" \
               --header "Accept: application/json" \
               --header "Content-Type: application/json" \
               --data-binary @/tmp/ripe-update.json \
               "$endpoint?dry-run" >/dev/null
 
-            curl --request PUT --fail-with-body --silent --show-error \
+            curl --request "$method" --fail-with-body --silent --show-error \
               --header "Authorization: Basic $RIPE_API_AUTH" \
               --header "Accept: application/json" \
               --header "Content-Type: application/json" \

@@ -1,0 +1,33 @@
+objects:
+  object:
+  - attributes:
+      attribute:
+      - name: rtr-set
+        value: AS218822:RTRS-ROUTERS
+      - name: descr
+        value: Routers operated by AS218822
+      - name: members
+        value: core.as218822.net
+      - name: members
+        value: lagrange.as218822.net
+      - name: members
+        value: vultr.as218822.net
+      - name: org
+        value: ORG-PMH3-RIPE
+      - name: admin-c
+        value: MP41209-RIPE
+      - name: tech-c
+        value: MP41209-RIPE
+      - name: notify
+        value: pmh_only@pmh.codes
+      - name: mnt-by
+        value: MINHYEOK-MNT
+      - name: source
+        value: RIPE
+    primary-key:
+      attribute:
+      - name: rtr-set
+        value: AS218822:RTRS-ROUTERS
+    source:
+      id: ripe
+    type: rtr-set

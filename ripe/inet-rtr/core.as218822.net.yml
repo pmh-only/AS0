@@ -1,0 +1,31 @@
+objects:
+  object:
+  - attributes:
+      attribute:
+      - name: inet-rtr
+        value: core.as218822.net
+      - name: descr
+        value: AS218822 central router
+      - name: local-as
+        value: AS218822
+      - name: ifaddr
+        value: 158.179.174.47 masklen 32
+      - name: org
+        value: ORG-PMH3-RIPE
+      - name: admin-c
+        value: MP41209-RIPE
+      - name: tech-c
+        value: MP41209-RIPE
+      - name: notify
+        value: pmh_only@pmh.codes
+      - name: mnt-by
+        value: MINHYEOK-MNT
+      - name: source
+        value: RIPE
+    primary-key:
+      attribute:
+      - name: inet-rtr
+        value: core.as218822.net
+    source:
+      id: ripe
+    type: inet-rtr

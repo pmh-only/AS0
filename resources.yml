@@ -13,7 +13,23 @@ resources:
     name: f.f.0.1.0.8.9.6.0.a.2.ip6.arpa
   - type: route6
     name: 2a06:9801:ff0::/44AS218822
+  - type: route6
+    name: 2a06:9801:ffa::/48AS218822
+  - type: route6
+    name: 2a06:9801:ffb::/48AS218822
   - type: aut-num
     name: AS218822
   - type: as-set
     name: AS218822:AS-PMHONLY
+  - type: route-set
+    name: AS218822:RS-PREFIXES
+  - type: peering-set
+    name: AS218822:PRNG-UPSTREAMS
+  - type: inet-rtr
+    name: core.as218822.net
+  - type: inet-rtr
+    name: lagrange.as218822.net
+  - type: inet-rtr
+    name: vultr.as218822.net
+  - type: rtr-set
+    name: AS218822:RTRS-ROUTERS

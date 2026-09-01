@@ -1,0 +1,94 @@
+---
+import Dither from "../components/Dither.jsx";
+import "@fontsource-variable/space-grotesk";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content="AS218822" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%238f36ff%22/><text x=%2250%22 y=%2268%22 text-anchor=%22middle%22 font-size=%2252%22 font-family=%22Arial%22 font-weight=%22700%22 fill=%22white%22>AS</text></svg>"
+    />
+    <title>AS218822</title>
+    <style>
+      :global(*) {
+        box-sizing: border-box;
+      }
+
+      :global(html),
+      :global(body) {
+        width: 100%;
+        min-height: 100%;
+        margin: 0;
+        background: #050505;
+      }
+
+      :global(body) {
+        overflow: hidden;
+      }
+
+      .scene {
+        position: relative;
+        width: 100%;
+        height: 100svh;
+        min-height: 28rem;
+        isolation: isolate;
+        overflow: hidden;
+      }
+
+      .dither {
+        position: absolute;
+        inset: 0;
+      }
+
+      h1 {
+        position: absolute;
+        z-index: 1;
+        inset: 50% auto auto 50%;
+        margin: 0;
+        color: #fff;
+        font-family: "Space Grotesk Variable", sans-serif;
+        font-size: clamp(3.5rem, 13vw, 12rem);
+        font-weight: 700;
+        letter-spacing: -0.075em;
+        line-height: 0.8;
+        text-align: center;
+        text-shadow: 0 0 3rem rgb(0 0 0 / 45%);
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        user-select: none;
+        white-space: nowrap;
+      }
+
+      @media (max-width: 32rem) {
+        h1 {
+          font-size: 17vw;
+          letter-spacing: -0.065em;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="scene">
+      <div class="dither" aria-hidden="true">
+        <Dither
+          client:load
+          waveColor={[0.56, 0.21, 1]}
+          backgroundColor={[0.02, 0.02, 0.02]}
+          waveSpeed={0.05}
+          waveFrequency={3}
+          waveAmplitude={0.3}
+          colorNum={4}
+          pixelSize={3}
+          enableMouseInteraction={false}
+          mouseRadius={0.3}
+        />
+      </div>
+      <h1>AS218822</h1>
+    </main>
+  </body>
+</html>

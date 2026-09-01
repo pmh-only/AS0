@@ -43,6 +43,16 @@ jobs:
             --volume "$PWD/routing/edge/lagrange/tunnels:/etc/tunnels:ro" \
             as218822-bird render-bird-config
 
+      - name: Parse Vultr edge configuration
+        run: |
+          docker run --rm \
+            --env BIRD_VALIDATE=1 \
+            --volume "$PWD/routing/edge/vultr/bird/bird.conf:/etc/bird/bird.conf:ro" \
+            --volume "$PWD/routing/edge/vultr/bird/local.conf:/etc/bird/local.conf:ro" \
+            --volume "$PWD/routing/edge/vultr/bird/peers:/etc/bird/peers:ro" \
+            --volume "$PWD/routing/edge/vultr/tunnels:/etc/tunnels:ro" \
+            as218822-bird render-bird-config
+
       - name: Parse tunnel examples
         run: |
           docker run --rm \

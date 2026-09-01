@@ -1,4 +1,4 @@
-name: Build Lagrange edge container
+name: Build edge containers
 
 on:
   pull_request:
@@ -6,7 +6,7 @@ on:
       - ".github/workflows/build-edge-container.yml"
       - "routing/Dockerfile"
       - "routing/render-bird-config"
-      - "routing/edge/lagrange/**"
+      - "routing/edge/**"
   push:
     branches:
       - main
@@ -14,19 +14,18 @@ on:
       - ".github/workflows/build-edge-container.yml"
       - "routing/Dockerfile"
       - "routing/render-bird-config"
-      - "routing/edge/lagrange/**"
+      - "routing/edge/**"
 
 permissions:
   contents: read
   packages: write
 
 concurrency:
-  group: lagrange-edge-container-${{ github.ref }}
+  group: edge-containers-${{ github.ref }}
   cancel-in-progress: true
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: pmh-only/as218822-lagrange-edge
 
 jobs:
   build:
@@ -34,10 +33,24 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - architecture: amd64
+          - edge: lagrange
+            image: as218822-lagrange-edge
+            architecture: amd64
             platform: linux/amd64
             runner: ubuntu-24.04
-          - architecture: arm64
+          - edge: lagrange
+            image: as218822-lagrange-edge
+            architecture: arm64
+            platform: linux/arm64
+            runner: ubuntu-24.04-arm
+          - edge: vultr
+            image: as218822-vultr-edge
+            architecture: amd64
+            platform: linux/amd64
+            runner: ubuntu-24.04
+          - edge: vultr
+            image: as218822-vultr-edge
+            architecture: arm64
             platform: linux/arm64
             runner: ubuntu-24.04-arm
     runs-on: ${{ matrix.runner }}
@@ -61,12 +74,12 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: routing
-          build-args: CONFIG_ROOT=edge/lagrange
+          build-args: CONFIG_ROOT=edge/${{ matrix.edge }}
           platforms: ${{ matrix.platform }}
           load: true
-          tags: as218822-lagrange-edge:${{ matrix.architecture }}
-          cache-from: type=gha,scope=lagrange-edge-${{ matrix.architecture }}
-          cache-to: type=gha,mode=max,scope=lagrange-edge-${{ matrix.architecture }}
+          tags: ${{ matrix.image }}:${{ matrix.architecture }}
+          cache-from: type=gha,scope=${{ matrix.edge }}-edge-${{ matrix.architecture }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.edge }}-edge-${{ matrix.architecture }}
 
       - name: Build and push image by digest
         if: github.event_name != 'pull_request'
@@ -74,11 +87,11 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: routing
-          build-args: CONFIG_ROOT=edge/lagrange
+          build-args: CONFIG_ROOT=edge/${{ matrix.edge }}
           platforms: ${{ matrix.platform }}
-          outputs: type=image,name=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }},push-by-digest=true,name-canonical=true,push=true
-          cache-from: type=gha,scope=lagrange-edge-${{ matrix.architecture }}
-          cache-to: type=gha,mode=max,scope=lagrange-edge-${{ matrix.architecture }}
+          outputs: type=image,name=${{ env.REGISTRY }}/pmh-only/${{ matrix.image }},push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=gha,scope=${{ matrix.edge }}-edge-${{ matrix.architecture }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.edge }}-edge-${{ matrix.architecture }}
 
       - name: Export image digest
         if: github.event_name != 'pull_request'
@@ -92,7 +105,7 @@ jobs:
         if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
-          name: lagrange-edge-digest-${{ matrix.architecture }}
+          name: ${{ matrix.edge }}-edge-digest-${{ matrix.architecture }}
           path: /tmp/digests/*
           if-no-files-found: error
           retention-days: 1
@@ -100,12 +113,19 @@ jobs:
   merge:
     if: github.event_name != 'pull_request'
     needs: build
+    strategy:
+      matrix:
+        include:
+          - edge: lagrange
+            image: as218822-lagrange-edge
+          - edge: vultr
+            image: as218822-vultr-edge
     runs-on: ubuntu-24.04
     steps:
       - name: Download image digests
         uses: actions/download-artifact@v4
         with:
-          pattern: lagrange-edge-digest-*
+          pattern: ${{ matrix.edge }}-edge-digest-*
           path: /tmp/digests
           merge-multiple: true
 
@@ -123,7 +143,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/pmh-only/${{ matrix.image }}
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=sha
@@ -131,7 +151,7 @@ jobs:
       - name: Merge and publish manifests
         working-directory: /tmp/digests
         env:
-          IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          IMAGE: ${{ env.REGISTRY }}/pmh-only/${{ matrix.image }}
           TAGS: ${{ steps.meta.outputs.tags }}
         run: |
           mapfile -t tags <<< "$TAGS"
@@ -150,4 +170,4 @@ jobs:
           docker buildx imagetools create "${tag_args[@]}" "${digest_args[@]}"
 
       - name: Inspect published image
-        run: docker buildx imagetools inspect "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+        run: docker buildx imagetools inspect "${{ env.REGISTRY }}/pmh-only/${{ matrix.image }}:latest"

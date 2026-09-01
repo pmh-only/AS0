@@ -18,7 +18,7 @@ AS218822 Network Infrastructure Specs.
 - [ ] BYOASN
 - [ ] Announce
 
-### Self-announced range `2a06:9801:fff::/48`
+### Self-announced range `2a06:9801:ff0::/44`
 - [ ] BGP upstream tunneling: bgptunnel.com, hyehost
 - [ ] BGP daemon hosting: Oracle Cloud
 - [ ] Tailscale Exit Node

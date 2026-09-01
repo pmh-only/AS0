@@ -41,4 +41,6 @@ jobs:
             --volume "$PWD/routing/tunnels/gre/gre-upstream.conf.example:/etc/tunnels/gre/gre-upstream.conf:ro" \
             --volume "$PWD/routing/bird/peers/wireguard.conf.example:/etc/bird/peers/wireguard.conf:ro" \
             --volume "$PWD/routing/bird/peers/gre.conf.example:/etc/bird/peers/gre.conf:ro" \
+            --volume "$PWD/routing/tunnels/zerotier/network.conf.example:/etc/tunnels/zerotier/network.conf:ro" \
+            --volume "$PWD/routing/bird/peers/zerotier.conf.example:/etc/bird/peers/zerotier.conf:ro" \
             as218822-bird render-bird-config

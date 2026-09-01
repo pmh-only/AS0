@@ -1,0 +1,6 @@
+# Replace with the 16-character network ID from ZeroTier Central.
+network 8056c2e21c000001
+allowManaged true
+allowGlobal false
+allowDefault false
+allowDNS false

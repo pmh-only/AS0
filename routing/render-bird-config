@@ -5,11 +5,14 @@ umask 077
 runtime_peers=/run/bird/peers
 runtime_wireguard=/run/bird/wireguard
 runtime_gre=/run/bird/gre
+runtime_zerotier=/run/bird/zerotier
 wireguard_configs=
 gre_interfaces=
+zerotier_configs=
+zerotier_pid=
 bird_pid=
 
-mkdir -p "$runtime_peers" "$runtime_wireguard" "$runtime_gre"
+mkdir -p "$runtime_peers" "$runtime_wireguard" "$runtime_gre" "$runtime_zerotier"
 
 render_templates() {
     source_pattern=$1
@@ -118,6 +121,100 @@ configure_gre() {
     ip link set dev "$interface" up
 }
 
+read_zerotier_config() {
+    config=$1
+    network=
+    allow_managed=true
+    allow_global=false
+    allow_default=false
+    allow_dns=false
+
+    while read -r key value extra; do
+        case "$key" in
+            ''|'#'*) continue ;;
+        esac
+        if [ -n "${extra:-}" ] || [ -z "${value:-}" ]; then
+            echo "Invalid ZeroTier setting in $config: $key" >&2
+            exit 1
+        fi
+        case "$key" in
+            network) network=$value ;;
+            allowManaged) allow_managed=$value ;;
+            allowGlobal) allow_global=$value ;;
+            allowDefault) allow_default=$value ;;
+            allowDNS) allow_dns=$value ;;
+            *)
+                echo "Unknown ZeroTier setting in $config: $key" >&2
+                exit 1
+                ;;
+        esac
+    done < "$config"
+
+    if [ "${#network}" -ne 16 ]; then
+        echo "ZeroTier network ID must contain 16 hexadecimal characters in $config" >&2
+        exit 1
+    fi
+    case "$network" in
+        *[!0-9a-f]*)
+            echo "Invalid ZeroTier network ID in $config: $network" >&2
+            exit 1
+            ;;
+    esac
+    for value in "$allow_managed" "$allow_global" "$allow_default" "$allow_dns"; do
+        case "$value" in
+            true|false) ;;
+            *)
+                echo "ZeroTier options must be true or false in $config" >&2
+                exit 1
+                ;;
+        esac
+    done
+}
+
+start_zerotier() {
+    [ -n "$zerotier_configs" ] || return
+
+    if [ -z "${ZEROTIER_IDENTITY_SECRET:-}" ] || [ -z "${ZEROTIER_IDENTITY_PUBLIC:-}" ]; then
+        echo "ZEROTIER_IDENTITY_SECRET and ZEROTIER_IDENTITY_PUBLIC are required" >&2
+        exit 1
+    fi
+
+    mkdir -p /var/lib/zerotier-one/networks.d
+    rm -f /var/lib/zerotier-one/networks.d/*.conf
+    printf '%s\n' "$ZEROTIER_IDENTITY_SECRET" > /var/lib/zerotier-one/identity.secret
+    printf '%s\n' "$ZEROTIER_IDENTITY_PUBLIC" > /var/lib/zerotier-one/identity.public
+    chmod 0600 /var/lib/zerotier-one/identity.secret
+    chmod 0644 /var/lib/zerotier-one/identity.public
+
+    derived_identity=$(zerotier-idtool getpublic /var/lib/zerotier-one/identity.secret)
+    if [ "$derived_identity" != "$ZEROTIER_IDENTITY_PUBLIC" ]; then
+        echo "ZeroTier public and private identities do not match" >&2
+        exit 1
+    fi
+
+    zerotier-one /var/lib/zerotier-one &
+    zerotier_pid=$!
+
+    attempts=0
+    until zerotier-cli info >/dev/null 2>&1; do
+        attempts=$((attempts + 1))
+        if [ "$attempts" -ge 30 ]; then
+            echo "ZeroTier daemon did not become ready" >&2
+            exit 1
+        fi
+        sleep 1
+    done
+
+    for config in $zerotier_configs; do
+        read_zerotier_config "$config"
+        zerotier-cli join "$network"
+        zerotier-cli set "$network" "allowManaged=$allow_managed"
+        zerotier-cli set "$network" "allowGlobal=$allow_global"
+        zerotier-cli set "$network" "allowDefault=$allow_default"
+        zerotier-cli set "$network" "allowDNS=$allow_dns"
+    done
+}
+
 cleanup() {
     for config in $wireguard_configs; do
         wg-quick down "$config" >/dev/null 2>&1 || true
@@ -125,6 +222,10 @@ cleanup() {
     for interface in $gre_interfaces; do
         ip link delete "$interface" >/dev/null 2>&1 || true
     done
+    if [ -n "$zerotier_pid" ]; then
+        kill -TERM "$zerotier_pid" 2>/dev/null || true
+        wait "$zerotier_pid" 2>/dev/null || true
+    fi
 }
 
 terminate() {
@@ -136,6 +237,20 @@ terminate() {
 render_templates '/etc/bird/peers/*.conf' "$runtime_peers"
 render_templates '/etc/tunnels/wireguard/*.conf' "$runtime_wireguard"
 render_templates '/etc/tunnels/gre/*.conf' "$runtime_gre"
+render_templates '/etc/tunnels/zerotier/*.conf' "$runtime_zerotier"
+
+for config in "$runtime_zerotier"/*.conf; do
+    [ -f "$config" ] || continue
+    read_zerotier_config "$config"
+    zerotier_configs="$config $zerotier_configs"
+done
+
+trap cleanup EXIT
+trap terminate INT TERM
+
+if [ "${BIRD_VALIDATE:-0}" != 1 ]; then
+    start_zerotier
+fi
 
 for config in "$runtime_wireguard"/*.conf; do
     [ -f "$config" ] || continue
@@ -156,9 +271,6 @@ done
 if [ "${BIRD_VALIDATE:-0}" = 1 ]; then
     exec bird -p -c /etc/bird/bird.conf
 fi
-
-trap cleanup EXIT
-trap terminate INT TERM
 
 bird -f -c /etc/bird/bird.conf -s /run/bird/bird.ctl &
 bird_pid=$!

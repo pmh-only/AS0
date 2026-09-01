@@ -248,6 +248,15 @@ done
 trap cleanup EXIT
 trap terminate INT TERM
 
+if [ "${ENABLE_IPV6_FORWARDING:-0}" = 1 ] && [ "${BIRD_VALIDATE:-0}" != 1 ]; then
+    forwarding_path=${IPV6_FORWARDING_PATH:-/proc/sys/net/ipv6/conf/all/forwarding}
+    if [ ! -w "$forwarding_path" ]; then
+        echo "IPv6 forwarding setting is not writable: $forwarding_path" >&2
+        exit 1
+    fi
+    printf '1\n' > "$forwarding_path"
+fi
+
 if [ "${BIRD_VALIDATE:-0}" != 1 ]; then
     start_zerotier
 fi

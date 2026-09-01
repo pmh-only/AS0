@@ -3,6 +3,8 @@ FROM zerotier/zerotier@sha256:4d0542fa43f4ffaac4e702eb89d3ba6c6c4e6736fdd253b124
 
 FROM debian:bookworm-slim
 
+ARG CONFIG_ROOT=.
+
 RUN apt-get update \
     && apt-get install --no-install-recommends -y bird2 ca-certificates gettext-base iproute2 libstdc++6 tini wireguard-tools \
     && rm -rf /var/lib/apt/lists/* \
@@ -13,8 +15,8 @@ COPY --from=dotenvx /usr/local/bin/dotenvx /usr/local/bin/dotenvx
 COPY --from=zerotier /usr/sbin/zerotier-one /usr/sbin/zerotier-one
 RUN ln -s zerotier-one /usr/sbin/zerotier-cli \
     && ln -s zerotier-one /usr/sbin/zerotier-idtool
-COPY bird /etc/bird
-COPY tunnels /etc/tunnels
+COPY ${CONFIG_ROOT}/bird /etc/bird
+COPY ${CONFIG_ROOT}/tunnels /etc/tunnels
 COPY --chmod=0755 render-bird-config /usr/local/bin/render-bird-config
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \

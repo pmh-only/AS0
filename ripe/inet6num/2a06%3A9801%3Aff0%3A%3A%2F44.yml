@@ -51,9 +51,11 @@ objects:
       - name: created
         value: '2026-08-26T23:19:30Z'
       - name: last-modified
-        value: '2026-08-31T23:19:26Z'
+        value: '2026-09-01T16:16:21Z'
       - name: source
         value: RIPE
+      - name: geofeed
+        value: https://as218822.net/geofeed.csv
     link:
       href: https://rest.db.ripe.net/ripe/inet6num/2a06:9801:ff0::/44
       type: locator

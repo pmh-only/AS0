@@ -30,4 +30,15 @@ jobs:
           docker run --rm \
             --env BIRD_VALIDATE=1 \
             --volume "$PWD/routing/bird:/etc/bird:ro" \
-            as218822-bird
+            --volume "$PWD/routing/tunnels:/etc/tunnels:ro" \
+            as218822-bird render-bird-config
+
+      - name: Parse tunnel examples
+        run: |
+          docker run --rm \
+            --env BIRD_VALIDATE=1 \
+            --volume "$PWD/routing/tunnels/wireguard/wg-upstream.conf.example:/etc/tunnels/wireguard/wg-upstream.conf:ro" \
+            --volume "$PWD/routing/tunnels/gre/gre-upstream.conf.example:/etc/tunnels/gre/gre-upstream.conf:ro" \
+            --volume "$PWD/routing/bird/peers/wireguard.conf.example:/etc/bird/peers/wireguard.conf:ro" \
+            --volume "$PWD/routing/bird/peers/gre.conf.example:/etc/bird/peers/gre.conf:ro" \
+            as218822-bird render-bird-config

@@ -23,3 +23,4 @@ services:
       - ./bird/bird.conf:/etc/bird/bird.conf:ro
       - ./bird/local.conf:/etc/bird/local.conf:ro
       - ./bird/peers:/etc/bird/peers:ro
+      - ./tunnels:/etc/tunnels:ro

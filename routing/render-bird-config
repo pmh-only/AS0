@@ -1,38 +1,170 @@
 #!/bin/sh
 set -eu
+umask 077
 
 runtime_peers=/run/bird/peers
-mkdir -p "$runtime_peers"
+runtime_wireguard=/run/bird/wireguard
+runtime_gre=/run/bird/gre
+wireguard_configs=
+gre_interfaces=
+bird_pid=
 
-for template in /etc/bird/peers/*.conf; do
-    variables=$(envsubst --variables "$(cat "$template")")
-    for variable in $variables; do
-        if ! printenv "$variable" >/dev/null; then
-            if [ "${BIRD_VALIDATE:-0}" = 1 ]; then
-                export "$variable=validation-secret"
-            else
-                echo "Missing dotenvx variable: $variable" >&2
-                exit 1
+mkdir -p "$runtime_peers" "$runtime_wireguard" "$runtime_gre"
+
+render_templates() {
+    source_pattern=$1
+    destination=$2
+
+    for template in $source_pattern; do
+        [ -f "$template" ] || continue
+
+        variables=$(envsubst --variables "$(cat "$template")")
+        for variable in $variables; do
+            if ! printenv "$variable" >/dev/null; then
+                if [ "${BIRD_VALIDATE:-0}" = 1 ]; then
+                    export "$variable=validation-secret"
+                else
+                    echo "Missing dotenvx variable: $variable" >&2
+                    exit 1
+                fi
             fi
-        fi
 
-        value=$(printenv "$variable")
-        case "$value" in
-            *'
+            value=$(printenv "$variable")
+            case "$value" in
+                *'
 '*)
-                echo "dotenvx variable contains a newline: $variable" >&2
+                    echo "dotenvx variable contains a newline: $variable" >&2
+                    exit 1
+                    ;;
+            esac
+            escaped=$(printf '%s' "$value" | sed 's/\\/\\\\/g; s/"/\\"/g')
+            export "$variable=$escaped"
+        done
+
+        envsubst < "$template" > "$destination/$(basename "$template")"
+    done
+}
+
+validate_interface_name() {
+    interface=$1
+    case "$interface" in
+        ''|*[!a-zA-Z0-9_.-]*)
+            echo "Invalid tunnel interface name: $interface" >&2
+            exit 1
+            ;;
+    esac
+    if [ "${#interface}" -gt 15 ]; then
+        echo "Tunnel interface name exceeds 15 characters: $interface" >&2
+        exit 1
+    fi
+}
+
+configure_gre() {
+    config=$1
+    interface=$(basename "$config" .conf)
+    validate_interface_name "$interface"
+
+    type=
+    local_address=
+    remote_address=
+    tunnel_address=
+    ttl=255
+    mtu=
+
+    while read -r key value extra; do
+        case "$key" in
+            ''|'#'*) continue ;;
+        esac
+        if [ -n "${extra:-}" ] || [ -z "${value:-}" ]; then
+            echo "Invalid GRE setting in $config: $key" >&2
+            exit 1
+        fi
+        case "$key" in
+            type) type=$value ;;
+            local) local_address=$value ;;
+            remote) remote_address=$value ;;
+            address) tunnel_address=$value ;;
+            ttl) ttl=$value ;;
+            mtu) mtu=$value ;;
+            *)
+                echo "Unknown GRE setting in $config: $key" >&2
                 exit 1
                 ;;
         esac
-        escaped=$(printf '%s' "$value" | sed 's/\\/\\\\/g; s/"/\\"/g')
-        export "$variable=$escaped"
-    done
+    done < "$config"
 
-    envsubst < "$template" > "$runtime_peers/$(basename "$template")"
+    case "$type" in
+        gre) ttl_option=ttl ;;
+        ip6gre) ttl_option=hoplimit ;;
+        *)
+            echo "GRE type must be gre or ip6gre in $config" >&2
+            exit 1
+            ;;
+    esac
+    if [ -z "$local_address" ] || [ -z "$remote_address" ] || [ -z "$tunnel_address" ]; then
+        echo "GRE local, remote, and address are required in $config" >&2
+        exit 1
+    fi
+
+    [ "${BIRD_VALIDATE:-0}" = 1 ] && return
+
+    ip link add "$interface" type "$type" \
+        local "$local_address" remote "$remote_address" "$ttl_option" "$ttl"
+    gre_interfaces="$interface $gre_interfaces"
+    if [ -n "$mtu" ]; then
+        ip link set dev "$interface" mtu "$mtu"
+    fi
+    ip address add "$tunnel_address" dev "$interface"
+    ip link set dev "$interface" up
+}
+
+cleanup() {
+    for config in $wireguard_configs; do
+        wg-quick down "$config" >/dev/null 2>&1 || true
+    done
+    for interface in $gre_interfaces; do
+        ip link delete "$interface" >/dev/null 2>&1 || true
+    done
+}
+
+terminate() {
+    if [ -n "$bird_pid" ]; then
+        kill -TERM "$bird_pid" 2>/dev/null || true
+    fi
+}
+
+render_templates '/etc/bird/peers/*.conf' "$runtime_peers"
+render_templates '/etc/tunnels/wireguard/*.conf' "$runtime_wireguard"
+render_templates '/etc/tunnels/gre/*.conf' "$runtime_gre"
+
+for config in "$runtime_wireguard"/*.conf; do
+    [ -f "$config" ] || continue
+    interface=$(basename "$config" .conf)
+    validate_interface_name "$interface"
+    wg-quick strip "$config" >/dev/null
+    if [ "${BIRD_VALIDATE:-0}" != 1 ]; then
+        wg-quick up "$config"
+        wireguard_configs="$config $wireguard_configs"
+    fi
+done
+
+for config in "$runtime_gre"/*.conf; do
+    [ -f "$config" ] || continue
+    configure_gre "$config"
 done
 
 if [ "${BIRD_VALIDATE:-0}" = 1 ]; then
     exec bird -p -c /etc/bird/bird.conf
 fi
 
-exec bird -f -c /etc/bird/bird.conf -s /run/bird/bird.ctl
+trap cleanup EXIT
+trap terminate INT TERM
+
+bird -f -c /etc/bird/bird.conf -s /run/bird/bird.ctl &
+bird_pid=$!
+if wait "$bird_pid"; then
+    status=0
+else
+    status=$?
+fi
+exit "$status"

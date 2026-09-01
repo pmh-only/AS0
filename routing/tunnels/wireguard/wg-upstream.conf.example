@@ -1,0 +1,11 @@
+[Interface]
+Address = fd00:218:822::2/127
+PrivateKey = ${WG_UPSTREAM_PRIVATE_KEY}
+ListenPort = 51820
+
+[Peer]
+PublicKey = replace-with-upstream-public-key
+# PresharedKey = ${WG_UPSTREAM_PRESHARED_KEY}
+Endpoint = [2001:db8::1]:51820
+AllowedIPs = fd00:218:822::1/128
+PersistentKeepalive = 25

@@ -1,0 +1,7 @@
+# The filename (without .conf) is the interface name and must be <= 15 chars.
+type ip6gre
+local 2001:db8::2
+remote 2001:db8::1
+address fd00:218:822:1::2/127
+ttl 255
+mtu 1436

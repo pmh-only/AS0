@@ -13,17 +13,23 @@ AS218822 Network Infrastructure Specs.
 - [ ] BYOASN
 - [ ] Announce
 
-### AWS BYOASN/BYOIP range `2a06:9801:ffa::/48` (regional), `2a06:9801:ffb::/48` (edge)
+### AWS BYOASN/BYOIP range
+- [x] BYOASN
+
+#### `2a06:9801:ffa::/48` (regional)
 - [x] IPAM Pool allocation
-- [ ] BYOASN
+- [x] Announce
+
+#### `2a06:9801:ffb::/48` (edge)
+- [x] IPAM Pool allocation
 - [ ] Announce
 
 ### Self-announced range `2a06:9801:ff0::/44`
 - [ ] BGP upstream tunneling: bgptunnel.com, hyehost
-- [ ] BGP daemon hosting: Oracle Cloud
+- [x] BGP daemon hosting: Oracle Cloud
 - [ ] Tailscale Exit Node
 
 ### Infrastructure As Code
-- [ ] RIPE Database GitOps
-- [ ] Container image for BGP Daemon
+- [x] RIPE Database GitOps
+- [x] Container image for BGP Daemon
 - [ ] Able to accept peering request by Github issue

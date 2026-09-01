@@ -30,6 +30,8 @@ objects:
         value: ns2.pmh.codes
       - name: nserver
         value: ns3.pmh.codes
+      - name: ds-rdata
+        value: 31907 13 2 DF704AEDFA50BFC27BED9D70A1DD429288E993A2F3926085B85178CF9F5FFDDB
       - link:
           href: https://rest.db.ripe.net/ripe/mntner/LAGRANGE-AUTO-MNT
           type: locator
@@ -39,7 +41,7 @@ objects:
       - name: created
         value: '2026-08-27T07:39:33Z'
       - name: last-modified
-        value: '2026-08-27T07:39:33Z'
+        value: '2026-08-31T23:11:45Z'
       - name: source
         value: RIPE
     link:

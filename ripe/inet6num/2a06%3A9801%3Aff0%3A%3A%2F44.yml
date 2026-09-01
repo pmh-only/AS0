@@ -10,6 +10,10 @@ objects:
         value: Minhyeok Park
       - name: descr
         value: OCITOKEN::2a06:9801:ff0::/44:2cdd3dffc30f981d703d722e7ffa543215a374c3cabb4c8ddcf57e862247f659
+      - name: descr
+        value: OCITOKEN::2a06:9801:ff0::/44:6dc74c71ce16aaa18b5e8ad191fca76d6c93dc0524a21616a811574c4ff82846
+      - name: descr
+        value: OCITOKEN::2a06:9801:ff0::/44:ca8e13b3ccefd8cc24da5e0a82dc4a8b3b2b37c3cebb5562f989342ef9ecb2be
       - name: country
         value: KR
       - link:
@@ -47,7 +51,7 @@ objects:
       - name: created
         value: '2026-08-26T23:19:30Z'
       - name: last-modified
-        value: '2026-08-28T10:46:20Z'
+        value: '2026-08-31T23:19:26Z'
       - name: source
         value: RIPE
     link:

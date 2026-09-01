@@ -1,0 +1,33 @@
+name: Validate BIRD configuration
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/validate-bird.yml"
+      - "routing/**"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/validate-bird.yml"
+      - "routing/**"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Build BIRD image
+        run: docker build --tag as218822-bird routing
+
+      - name: Parse tracked configuration
+        run: |
+          docker run --rm \
+            --env BIRD_VALIDATE=1 \
+            --volume "$PWD/routing/bird:/etc/bird:ro" \
+            as218822-bird

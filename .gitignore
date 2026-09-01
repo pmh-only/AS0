@@ -2,3 +2,5 @@ node_modules/
 .astro/
 dist/
 .DS_Store
+**/.env.keys
+**/.env.*.keys

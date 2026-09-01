@@ -1,0 +1,4 @@
+README.md
+bird/peers/*.example
+bird/.env.keys
+bird/.env.*.keys

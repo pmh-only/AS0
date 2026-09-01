@@ -1,0 +1,38 @@
+#!/bin/sh
+set -eu
+
+runtime_peers=/run/bird/peers
+mkdir -p "$runtime_peers"
+
+for template in /etc/bird/peers/*.conf; do
+    variables=$(envsubst --variables "$(cat "$template")")
+    for variable in $variables; do
+        if ! printenv "$variable" >/dev/null; then
+            if [ "${BIRD_VALIDATE:-0}" = 1 ]; then
+                export "$variable=validation-secret"
+            else
+                echo "Missing dotenvx variable: $variable" >&2
+                exit 1
+            fi
+        fi
+
+        value=$(printenv "$variable")
+        case "$value" in
+            *'
+'*)
+                echo "dotenvx variable contains a newline: $variable" >&2
+                exit 1
+                ;;
+        esac
+        escaped=$(printf '%s' "$value" | sed 's/\\/\\\\/g; s/"/\\"/g')
+        export "$variable=$escaped"
+    done
+
+    envsubst < "$template" > "$runtime_peers/$(basename "$template")"
+done
+
+if [ "${BIRD_VALIDATE:-0}" = 1 ]; then
+    exec bird -p -c /etc/bird/bird.conf
+fi
+
+exec bird -f -c /etc/bird/bird.conf -s /run/bird/bird.ctl

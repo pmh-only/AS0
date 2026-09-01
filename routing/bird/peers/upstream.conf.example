@@ -1,0 +1,11 @@
+# Replace the documentation addresses and ASN with values from the upstream.
+protocol bgp upstream_primary from upstream_v6 {
+    neighbor 2001:db8:ffff::1 as 64500;
+    source address 2001:db8:ffff::2;
+
+    # Enable when the peer is not directly connected.
+    # multihop 2;
+
+    # The encrypted value belongs in /etc/bird/.env, not in this file.
+    password "${BGP_UPSTREAM_PRIMARY_PASSWORD}";
+}

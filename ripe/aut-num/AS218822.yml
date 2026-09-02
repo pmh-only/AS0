@@ -73,43 +73,47 @@ objects:
       - name: mp-import
         value: afi ipv6.unicast from AS47272 accept ANY
       - name: mp-export
-        value: afi ipv6.unicast to AS47272 announce AS218822
+        value: afi ipv6.unicast to AS47272 announce AS218822:AS-PMHONLY
       - name: mp-import
         value: afi ipv6.unicast from AS209533 accept ANY
       - name: mp-export
-        value: afi ipv6.unicast to AS209533 announce AS218822
+        value: afi ipv6.unicast to AS209533 announce AS218822:AS-PMHONLY
       - name: mp-import
         value: afi ipv6.unicast from AS212895 accept ANY
       - name: mp-export
-        value: afi ipv6.unicast to AS212895 announce AS218822
+        value: afi ipv6.unicast to AS212895 announce AS218822:AS-PMHONLY
       - name: mp-import
         value: afi ipv6.unicast from AS209735 accept ANY
       - name: mp-export
-        value: afi ipv6.unicast to AS209735 announce AS218822
+        value: afi ipv6.unicast to AS209735 announce AS218822:AS-PMHONLY
       - name: mp-import
         value: afi ipv6.unicast from AS20473 accept ANY
       - name: mp-export
-        value: afi ipv6.unicast to AS20473 announce AS218822
+        value: afi ipv6.unicast to AS20473 announce AS218822:AS-PMHONLY
       - name: mp-import
         value: afi ipv6.unicast from AS16509 accept ANY
       - name: mp-export
-        value: afi ipv6.unicast to AS16509 announce AS218822
+        value: afi ipv6.unicast to AS16509 announce AS218822:AS-PMHONLY
       - name: mp-import
         value: afi ipv6.unicast from AS14618 accept ANY
       - name: mp-export
-        value: afi ipv6.unicast to AS14618 announce AS218822
+        value: afi ipv6.unicast to AS14618 announce AS218822:AS-PMHONLY
       - name: mp-import
         value: afi ipv6.unicast from AS31898 accept ANY
       - name: mp-export
-        value: afi ipv6.unicast to AS31898 announce AS218822
+        value: afi ipv6.unicast to AS31898 announce AS218822:AS-PMHONLY
       - name: mp-import
         value: afi ipv6.unicast from AS24381 accept ANY
       - name: mp-export
-        value: afi ipv6.unicast to AS24381 announce AS218822
+        value: afi ipv6.unicast to AS24381 announce AS218822:AS-PMHONLY
       - name: mp-import
         value: afi ipv6.unicast from AS41051 accept ANY
       - name: mp-export
-        value: afi ipv6.unicast to AS41051 announce AS218822
+        value: afi ipv6.unicast to AS41051 announce AS218822:AS-PMHONLY
+      - name: mp-import
+        value: afi ipv6.unicast from AS201423 accept AS201423
+      - name: mp-export
+        value: afi ipv6.unicast to AS201423 announce AS218822
     link:
       href: https://rest.db.ripe.net/ripe/aut-num/AS218822
       type: locator

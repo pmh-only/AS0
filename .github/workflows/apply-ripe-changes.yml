@@ -149,3 +149,48 @@ jobs:
             git diff --name-only --diff-filter=ACMRT -z \
               "$BEFORE_SHA" "$AFTER_SHA" -- 'ripe/**/*.yml'
           )
+
+          while IFS= read -r -d '' resource_path; do
+            RESOURCE_PATH="$resource_path" python - <<'PY' > /tmp/ripe-delete-target
+          import os
+          from pathlib import Path
+          from urllib.parse import quote
+
+          import yaml
+
+          path = Path(os.environ["RESOURCE_PATH"])
+          if len(path.parts) != 3 or path.parts[0] != "ripe" or path.suffix != ".yml":
+              raise ValueError(f"Invalid RIPE resource path: {path}")
+
+          resource_type = path.parts[1]
+          encoded_name = path.stem
+
+          with open("resources.yml", encoding="utf-8") as config_file:
+              configured = yaml.safe_load(config_file).get("resources", [])
+
+          expected = {
+              (resource["type"], quote(resource["name"], safe=""))
+              for resource in configured
+          }
+          if (resource_type, encoded_name) in expected:
+              raise ValueError(f"Deleted resource is still configured: {path}")
+
+          print(f"{resource_type}\t{encoded_name}")
+          PY
+
+            IFS=$'\t' read -r resource_type encoded_name < /tmp/ripe-delete-target
+            endpoint="https://rest.db.ripe.net/ripe/$resource_type/$encoded_name"
+
+            curl --request DELETE --fail-with-body --silent --show-error \
+              --header "Authorization: Basic $RIPE_API_AUTH" \
+              --header "Accept: application/json" \
+              "$endpoint?dry-run&reason=Removed%20from%20AS218822%20repository" >/dev/null
+
+            curl --request DELETE --fail-with-body --silent --show-error \
+              --header "Authorization: Basic $RIPE_API_AUTH" \
+              --header "Accept: application/json" \
+              "$endpoint?reason=Removed%20from%20AS218822%20repository" >/dev/null
+          done < <(
+            git diff --name-only --diff-filter=D -z \
+              "$BEFORE_SHA" "$AFTER_SHA" -- 'ripe/**/*.yml'
+          )

@@ -1,4 +1,4 @@
-name: Build edge containers
+name: Build Vultr edge container
 
 on:
   pull_request:
@@ -6,7 +6,7 @@ on:
       - ".github/workflows/build-edge-container.yml"
       - "routing/Dockerfile"
       - "routing/render-bird-config"
-      - "routing/edge/**"
+      - "routing/edge/vultr/**"
   push:
     branches:
       - main
@@ -14,14 +14,14 @@ on:
       - ".github/workflows/build-edge-container.yml"
       - "routing/Dockerfile"
       - "routing/render-bird-config"
-      - "routing/edge/**"
+      - "routing/edge/vultr/**"
 
 permissions:
   contents: read
   packages: write
 
 concurrency:
-  group: edge-containers-${{ github.ref }}
+  group: vultr-edge-container-${{ github.ref }}
   cancel-in-progress: true
 
 env:
@@ -33,16 +33,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - edge: lagrange
-            image: as218822-lagrange-edge
-            architecture: amd64
-            platform: linux/amd64
-            runner: ubuntu-24.04
-          - edge: lagrange
-            image: as218822-lagrange-edge
-            architecture: arm64
-            platform: linux/arm64
-            runner: ubuntu-24.04-arm
           - edge: vultr
             image: as218822-vultr-edge
             architecture: amd64
@@ -116,8 +106,6 @@ jobs:
     strategy:
       matrix:
         include:
-          - edge: lagrange
-            image: as218822-lagrange-edge
           - edge: vultr
             image: as218822-vultr-edge
     runs-on: ubuntu-24.04

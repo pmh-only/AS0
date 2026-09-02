@@ -26,8 +26,6 @@ resources:
   - type: inet-rtr
     name: core.as218822.net
   - type: inet-rtr
-    name: lagrange.as218822.net
-  - type: inet-rtr
     name: vultr.as218822.net
   - type: rtr-set
     name: AS218822:RTRS-ROUTERS

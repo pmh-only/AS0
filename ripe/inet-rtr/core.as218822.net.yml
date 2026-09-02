@@ -10,6 +10,8 @@ objects:
         value: AS218822
       - name: ifaddr
         value: 158.179.174.47 masklen 32
+      - name: interface
+        value: fd:e82c::2 masklen 64
       - link:
           href: https://rest.db.ripe.net/ripe/organisation/ORG-PMH3-RIPE
           type: locator

@@ -9,8 +9,6 @@ objects:
       - name: members
         value: core.as218822.net
       - name: members
-        value: lagrange.as218822.net
-      - name: members
         value: vultr.as218822.net
       - link:
           href: https://rest.db.ripe.net/ripe/organisation/ORG-PMH3-RIPE

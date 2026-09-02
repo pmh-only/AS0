@@ -70,7 +70,7 @@ configure_gre() {
     type=
     local_address=
     remote_address=
-    tunnel_address=
+    tunnel_addresses=
     ttl=255
     mtu=
 
@@ -86,7 +86,7 @@ configure_gre() {
             type) type=$value ;;
             local) local_address=$value ;;
             remote) remote_address=$value ;;
-            address) tunnel_address=$value ;;
+            address) tunnel_addresses="$tunnel_addresses $value" ;;
             ttl) ttl=$value ;;
             mtu) mtu=$value ;;
             *)
@@ -104,7 +104,7 @@ configure_gre() {
             exit 1
             ;;
     esac
-    if [ -z "$local_address" ] || [ -z "$remote_address" ] || [ -z "$tunnel_address" ]; then
+    if [ -z "$local_address" ] || [ -z "$remote_address" ] || [ -z "$tunnel_addresses" ]; then
         echo "GRE local, remote, and address are required in $config" >&2
         exit 1
     fi
@@ -117,7 +117,9 @@ configure_gre() {
     if [ -n "$mtu" ]; then
         ip link set dev "$interface" mtu "$mtu"
     fi
-    ip address add "$tunnel_address" dev "$interface"
+    for tunnel_address in $tunnel_addresses; do
+        ip address add "$tunnel_address" dev "$interface"
+    done
     ip link set dev "$interface" up
 }
 

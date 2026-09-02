@@ -19,11 +19,38 @@ services:
     env_file:
       - ./bird/.env.keys
     tmpfs:
-      - /run/bird:mode=0755,size=1m
       - /var/lib/zerotier-one:mode=0700,size=16m
     volumes:
+      - bird-run:/run/bird
       - ./bird/.env:/etc/bird/.env:ro
       - ./bird/bird.conf:/etc/bird/bird.conf:ro
       - ./bird/local.conf:/etc/bird/local.conf:ro
       - ./bird/peers:/etc/bird/peers:ro
       - ./tunnels:/etc/tunnels:ro
+
+  looking-glass:
+    build:
+      context: ./looking-glass
+    container_name: as218822-looking-glass
+    network_mode: host
+    restart: unless-stopped
+    read_only: true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_RAW
+    security_opt:
+      - no-new-privileges:true
+    depends_on:
+      bird:
+        condition: service_healthy
+    environment:
+      LG_ALLOWED_ORIGINS: ${LG_ALLOWED_ORIGINS:-https://as218822.net,https://www.as218822.net}
+      LG_HOST: ${LG_HOST:-127.0.0.1}
+      LG_LOCATION: ${LG_LOCATION:-core}
+      LG_PORT: ${LG_PORT:-8080}
+    volumes:
+      - bird-run:/run/bird:ro
+
+volumes:
+  bird-run:

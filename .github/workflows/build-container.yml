@@ -1,4 +1,4 @@
-name: Build BIRD container
+name: Build routing containers
 
 on:
   pull_request:
@@ -22,7 +22,6 @@ concurrency:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: pmh-only/as218822
 
 jobs:
   build:
@@ -30,10 +29,28 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - architecture: amd64
+          - component: bird
+            image: as218822
+            context: routing
+            architecture: amd64
             platform: linux/amd64
             runner: ubuntu-24.04
-          - architecture: arm64
+          - component: bird
+            image: as218822
+            context: routing
+            architecture: arm64
+            platform: linux/arm64
+            runner: ubuntu-24.04-arm
+          - component: looking-glass
+            image: as218822-looking-glass
+            context: routing/looking-glass
+            architecture: amd64
+            platform: linux/amd64
+            runner: ubuntu-24.04
+          - component: looking-glass
+            image: as218822-looking-glass
+            context: routing/looking-glass
+            architecture: arm64
             platform: linux/arm64
             runner: ubuntu-24.04-arm
     runs-on: ${{ matrix.runner }}
@@ -56,23 +73,23 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: docker/build-push-action@v6
         with:
-          context: routing
+          context: ${{ matrix.context }}
           platforms: ${{ matrix.platform }}
           load: true
-          tags: as218822-bird:${{ matrix.architecture }}
-          cache-from: type=gha,scope=bird-${{ matrix.architecture }}
-          cache-to: type=gha,mode=max,scope=bird-${{ matrix.architecture }}
+          tags: ${{ matrix.image }}:${{ matrix.architecture }}
+          cache-from: type=gha,scope=${{ matrix.component }}-${{ matrix.architecture }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.component }}-${{ matrix.architecture }}
 
       - name: Build and push image by digest
         if: github.event_name != 'pull_request'
         id: build
         uses: docker/build-push-action@v6
         with:
-          context: routing
+          context: ${{ matrix.context }}
           platforms: ${{ matrix.platform }}
-          outputs: type=image,name=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }},push-by-digest=true,name-canonical=true,push=true
-          cache-from: type=gha,scope=bird-${{ matrix.architecture }}
-          cache-to: type=gha,mode=max,scope=bird-${{ matrix.architecture }}
+          outputs: type=image,name=${{ env.REGISTRY }}/pmh-only/${{ matrix.image }},push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=gha,scope=${{ matrix.component }}-${{ matrix.architecture }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.component }}-${{ matrix.architecture }}
 
       - name: Export image digest
         if: github.event_name != 'pull_request'
@@ -86,7 +103,7 @@ jobs:
         if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
-          name: digest-${{ matrix.architecture }}
+          name: ${{ matrix.component }}-digest-${{ matrix.architecture }}
           path: /tmp/digests/*
           if-no-files-found: error
           retention-days: 1
@@ -94,12 +111,19 @@ jobs:
   merge:
     if: github.event_name != 'pull_request'
     needs: build
+    strategy:
+      matrix:
+        include:
+          - component: bird
+            image: as218822
+          - component: looking-glass
+            image: as218822-looking-glass
     runs-on: ubuntu-24.04
     steps:
       - name: Download image digests
         uses: actions/download-artifact@v4
         with:
-          pattern: digest-*
+          pattern: ${{ matrix.component }}-digest-*
           path: /tmp/digests
           merge-multiple: true
 
@@ -117,7 +141,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/pmh-only/${{ matrix.image }}
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=sha
@@ -125,7 +149,7 @@ jobs:
       - name: Merge and publish manifests
         working-directory: /tmp/digests
         env:
-          IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          IMAGE: ${{ env.REGISTRY }}/pmh-only/${{ matrix.image }}
           TAGS: ${{ steps.meta.outputs.tags }}
         run: |
           mapfile -t tags <<< "$TAGS"
@@ -144,4 +168,4 @@ jobs:
           docker buildx imagetools create "${tag_args[@]}" "${digest_args[@]}"
 
       - name: Inspect published image
-        run: docker buildx imagetools inspect "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+        run: docker buildx imagetools inspect "${{ env.REGISTRY }}/pmh-only/${{ matrix.image }}:latest"

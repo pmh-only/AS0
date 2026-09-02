@@ -1,6 +1,9 @@
 ---
 import Dither from "../components/Dither.jsx";
+import LookingGlass from "../components/LookingGlass.jsx";
 import "@fontsource-variable/space-grotesk";
+
+const apiUrl = import.meta.env.PUBLIC_LOOKING_GLASS_API_URL ?? "https://lg.pmh.codes";
 ---
 
 <!doctype html>
@@ -8,87 +11,152 @@ import "@fontsource-variable/space-grotesk";
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
-    <meta name="description" content="AS218822" />
+    <meta name="description" content="AS218822 public BGP looking glass" />
+    <meta name="theme-color" content="#09070c" />
     <link
       rel="icon"
       href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%238f36ff%22/><text x=%2250%22 y=%2268%22 text-anchor=%22middle%22 font-size=%2252%22 font-family=%22Arial%22 font-weight=%22700%22 fill=%22white%22>AS</text></svg>"
     />
-    <title>AS218822</title>
+    <title>Looking Glass / AS218822</title>
     <style>
-      :global(*) {
-        box-sizing: border-box;
-      }
-
-      :global(html),
+      :global(*) { box-sizing: border-box; }
+      :global(html) { background: #09070c; }
       :global(body) {
-        width: 100%;
+        min-width: 20rem;
         min-height: 100%;
         margin: 0;
-        background: #050505;
+        background: #09070c;
+        color: #fff;
+        font-family: "Space Grotesk Variable", sans-serif;
       }
+      :global(button), :global(input) { font: inherit; }
+      :global(::selection) { background: #a95cff; color: #fff; }
 
-      :global(body) {
-        overflow: hidden;
-      }
-
-      .scene {
+      .page {
         position: relative;
-        width: 100%;
-        height: 100svh;
-        min-height: 28rem;
+        min-height: 100svh;
         isolation: isolate;
         overflow: hidden;
       }
 
-      .dither {
-        position: absolute;
+      .background {
+        position: fixed;
+        z-index: -2;
         inset: 0;
+        opacity: 0.56;
       }
 
-      h1 {
-        position: absolute;
-        z-index: 1;
-        inset: 50% auto auto 50%;
-        margin: 0;
-        color: #fff;
-        font-family: "Space Grotesk Variable", sans-serif;
-        font-size: clamp(3.5rem, 13vw, 12rem);
-        font-weight: 700;
-        letter-spacing: -0.075em;
-        line-height: 0.8;
-        text-align: center;
-        text-shadow: 0 0 3rem rgb(0 0 0 / 45%);
-        transform: translate(-50%, -50%);
+      .page::before {
+        position: fixed;
+        z-index: -1;
+        inset: 0;
+        background:
+          linear-gradient(90deg, rgb(4 3 6 / 86%) 0%, rgb(5 4 7 / 62%) 48%, rgb(5 4 7 / 75%) 100%),
+          radial-gradient(circle at 84% 10%, transparent 0, #08060b 68%);
+        content: "";
         pointer-events: none;
-        user-select: none;
-        white-space: nowrap;
       }
 
-      @media (max-width: 32rem) {
-        h1 {
-          font-size: 17vw;
-          letter-spacing: -0.065em;
-        }
+      .grid {
+        position: fixed;
+        z-index: -1;
+        inset: 0;
+        opacity: 0.14;
+        background-image:
+          linear-gradient(rgb(255 255 255 / 16%) 1px, transparent 1px),
+          linear-gradient(90deg, rgb(255 255 255 / 16%) 1px, transparent 1px);
+        background-size: 5rem 5rem;
+        mask-image: linear-gradient(to bottom, #000, transparent 70%);
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: min(100% - 3rem, 86rem);
+        margin: 0 auto;
+        padding: 1.65rem 0;
+        border-bottom: 1px solid rgb(255 255 255 / 13%);
+      }
+
+      .brand { color: #fff; font-size: 0.9rem; font-weight: 740; letter-spacing: -0.02em; text-decoration: none; }
+      .brand span { color: #ae63ff; }
+      nav { display: flex; gap: 1.6rem; }
+      nav a { color: #8f8b96; font-size: 0.72rem; letter-spacing: 0.07em; text-decoration: none; text-transform: uppercase; }
+      nav a:hover { color: #fff; }
+
+      main {
+        display: grid;
+        grid-template-columns: minmax(18rem, 0.8fr) minmax(32rem, 1.2fr);
+        gap: clamp(3rem, 8vw, 8rem);
+        align-items: center;
+        width: min(100% - 3rem, 86rem);
+        min-height: calc(100svh - 6rem);
+        margin: 0 auto;
+        padding: 4rem 0 5rem;
+      }
+
+      .intro { align-self: center; }
+      .kicker { display: flex; align-items: center; gap: 0.8rem; margin: 0 0 1.5rem; color: #b96eff; font: 0.7rem "SFMono-Regular", Consolas, monospace; letter-spacing: 0.17em; text-transform: uppercase; }
+      .kicker::before { width: 2.5rem; height: 1px; background: currentColor; content: ""; }
+      h1 { max-width: 8ch; margin: 0; font-size: clamp(4.2rem, 8vw, 8.2rem); font-weight: 650; letter-spacing: -0.08em; line-height: 0.78; }
+      h1 span { display: block; color: transparent; -webkit-text-stroke: 1px rgb(255 255 255 / 46%); }
+      .description { max-width: 29rem; margin: 2.2rem 0 0; color: #a19da8; font-size: clamp(0.86rem, 1.2vw, 1rem); line-height: 1.65; }
+      .facts { display: flex; gap: 2.2rem; margin: 2.6rem 0 0; padding: 0; list-style: none; }
+      .facts li { color: #65616c; font: 0.63rem/1.6 "SFMono-Regular", Consolas, monospace; letter-spacing: 0.09em; text-transform: uppercase; }
+      .facts strong { display: block; color: #d8d5dc; font-size: 0.75rem; font-weight: 500; }
+
+      @media (max-width: 58rem) {
+        main { grid-template-columns: 1fr; gap: 3.5rem; padding-top: 5.5rem; }
+        .intro { display: grid; grid-template-columns: 1fr 1fr; column-gap: 2rem; align-items: end; }
+        .kicker { grid-column: 1 / -1; }
+        h1 { font-size: clamp(4rem, 13vw, 7rem); }
+        .description { margin-top: 0; }
+        .facts { grid-column: 2; }
+      }
+
+      @media (max-width: 38rem) {
+        header, main { width: min(100% - 2rem, 86rem); }
+        header { padding-block: 1.2rem; }
+        nav a:not(:last-child) { display: none; }
+        main { display: block; padding: 4rem 0 2.5rem; }
+        .intro { display: block; margin-bottom: 3rem; }
+        h1 { font-size: clamp(4rem, 21vw, 6rem); }
+        .description { margin-top: 1.8rem; }
+        .facts { gap: 1.3rem; margin-bottom: 0; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .background { display: none; }
       }
     </style>
   </head>
   <body>
-    <main class="scene">
-      <div class="dither" aria-hidden="true">
-        <Dither
-          client:load
-          waveColor={[0.56, 0.21, 1]}
-          backgroundColor={[0.02, 0.02, 0.02]}
-          waveSpeed={0.05}
-          waveFrequency={3}
-          waveAmplitude={0.3}
-          colorNum={4}
-          pixelSize={3}
-          enableMouseInteraction={false}
-          mouseRadius={0.3}
-        />
+    <div class="page">
+      <div class="background" aria-hidden="true">
+        <Dither client:load waveColor={[0.56, 0.21, 1]} backgroundColor={[0.02, 0.02, 0.02]} waveSpeed={0.035} waveFrequency={3} waveAmplitude={0.3} colorNum={4} pixelSize={3} enableMouseInteraction={false} mouseRadius={0.3} />
       </div>
-      <h1>AS218822</h1>
-    </main>
+      <div class="grid" aria-hidden="true"></div>
+      <header>
+        <a class="brand" href="/">AS<span>218822</span></a>
+        <nav aria-label="Primary navigation">
+          <a href="https://www.peeringdb.com/net/43433">PeeringDB</a>
+          <a href="https://github.com/pmh-only/AS218822">Network source</a>
+        </nav>
+      </header>
+      <main>
+        <section class="intro" aria-labelledby="page-title">
+          <p class="kicker">Network observatory</p>
+          <h1 id="page-title">LOOK<span>ING GLASS</span></h1>
+          <p class="description">Inspect live routes and test IPv6 reachability from the AS218822 core. A small, open network built for learning in public.</p>
+          <ul class="facts" aria-label="Network facts">
+            <li><strong>AS218822</strong>Network</li>
+            <li><strong>IPv6</strong>Protocol</li>
+            <li><strong>APAC</strong>Region</li>
+          </ul>
+        </section>
+        <LookingGlass client:load apiUrl={apiUrl} />
+      </main>
+    </div>
   </body>
 </html>

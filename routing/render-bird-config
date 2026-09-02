@@ -12,6 +12,7 @@ zerotier_configs=
 zerotier_pid=
 bird_pid=
 
+rm -rf "$runtime_peers" "$runtime_wireguard" "$runtime_gre" "$runtime_zerotier"
 mkdir -p "$runtime_peers" "$runtime_wireguard" "$runtime_gre" "$runtime_zerotier"
 
 render_templates() {

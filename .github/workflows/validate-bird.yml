@@ -25,6 +25,9 @@ jobs:
       - name: Build BIRD image
         run: docker build --tag as218822-bird routing
 
+      - name: Build looking glass image
+        run: docker build --tag as218822-looking-glass routing/looking-glass
+
       - name: Parse tracked configuration
         run: |
           docker run --rm \

@@ -8,7 +8,7 @@ website: https://as218822.net
 social_media:
 - service: website
   identifier: https://as218822.net
-looking_glass: ''
+looking_glass: https://as218822.net
 route_server: ''
 irr_as_set: RIPE::AS218822:AS-PMHONLY
 info_types:

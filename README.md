@@ -22,10 +22,10 @@ AS218822 Network Infrastructure Specs.
 
 #### `2a06:9801:ffb::/48` (edge)
 - [x] IPAM Pool allocation
-- [ ] Announce
+- [x] Announce
 
 ### Self-announced range `2a06:9801:ff0::/44`
-- [ ] BGP upstream tunneling: bgptunnel.com, hyehost
+- [x] BGP upstream tunneling: bgptunnel.com, hyehost
 - [x] BGP daemon hosting: Oracle Cloud
 - [ ] Tailscale Exit Node
 

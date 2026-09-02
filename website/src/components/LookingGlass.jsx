@@ -6,17 +6,17 @@ const queryTypes = {
   route: {
     label: "BGP route",
     placeholder: "2a06:9801:ff0::/44",
-    hint: "IPv6 address or prefix",
+    hint: "IPv6 address, prefix, or hostname",
   },
   ping: {
     label: "Ping",
-    placeholder: "2606:4700:4700::1111",
-    hint: "IPv6 address",
+    placeholder: "one.one.one.one",
+    hint: "IPv6 address or hostname",
   },
   traceroute: {
     label: "Traceroute",
-    placeholder: "2606:4700:4700::1111",
-    hint: "IPv6 address",
+    placeholder: "one.one.one.one",
+    hint: "IPv6 address or hostname",
   },
 };
 

@@ -1,4 +1,5 @@
 import { createServer } from "node:http";
+import { resolve6 } from "node:dns/promises";
 import { isIP } from "node:net";
 import { spawn } from "node:child_process";
 
@@ -18,7 +19,7 @@ const requests = new Map();
 const jobs = {
   route: {
     timeout: 5_000,
-    validate: isNetwork,
+    resolve: resolveRouteTarget,
     command: (target) => [
       "birdc",
       ["-r", "-s", birdSocket, `show route for ${target} all`],
@@ -26,12 +27,12 @@ const jobs = {
   },
   ping: {
     timeout: 12_000,
-    validate: isIPv6Address,
+    resolve: resolveHostTarget,
     command: (target) => ["ping", ["-n", "-c", "4", "-W", "2", target]],
   },
   traceroute: {
     timeout: 45_000,
-    validate: isIPv6Address,
+    resolve: resolveHostTarget,
     command: (target) => [
       "traceroute",
       ["-n", "-m", "20", "-w", "2", "-q", "1", target],
@@ -49,6 +50,38 @@ function isNetwork(value) {
 
 function isIPv6Address(value) {
   return isIP(value) === 6;
+}
+
+function isHostname(value) {
+  const hostname = value.endsWith(".") ? value.slice(0, -1) : value;
+  if (hostname.length > 253 || !hostname.includes(".")) return false;
+  return hostname.split(".").every(
+    (label) =>
+      label.length > 0 &&
+      label.length <= 63 &&
+      /^[a-z\d](?:[a-z\d-]*[a-z\d])?$/i.test(label),
+  );
+}
+
+async function resolveHostname(value) {
+  if (!isHostname(value)) throw new Error("Invalid IPv6 address or hostname");
+  try {
+    const addresses = await resolve6(value);
+    if (addresses.length > 0) return addresses[0];
+  } catch {
+    // Return the same public error for missing and invalid AAAA records.
+  }
+  throw new Error("Hostname has no IPv6 address");
+}
+
+async function resolveRouteTarget(value) {
+  if (isNetwork(value)) return value;
+  return resolveHostname(value);
+}
+
+async function resolveHostTarget(value) {
+  if (isIPv6Address(value)) return value;
+  return resolveHostname(value);
 }
 
 function corsHeaders(origin) {
@@ -161,17 +194,26 @@ const server = createServer(async (request, response) => {
     const body = await readJson(request);
     const job = jobs[body.type];
     const target = typeof body.target === "string" ? body.target.trim() : "";
-    if (!job || !job.validate(target)) {
+    if (!job || !target) {
       return respond(response, 400, { error: "Invalid query type or target" }, cors);
     }
 
+    let queryTarget;
+    try {
+      queryTarget = await job.resolve(target);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Invalid query target";
+      return respond(response, 400, { error: message }, cors);
+    }
+
     const startedAt = performance.now();
-    const [command, args] = job.command(target);
+    const [command, args] = job.command(queryTarget);
     const result = await run(command, args, job.timeout);
     return respond(response, 200, {
       ok: result.code === 0,
       type: body.type,
       target,
+      resolvedTarget: queryTarget === target ? undefined : queryTarget,
       location,
       elapsedMs: Math.round(performance.now() - startedAt),
       exitCode: result.code,

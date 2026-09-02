@@ -43,6 +43,14 @@ jobs:
             --volume "$PWD/routing/edge/vultr/tunnels:/etc/tunnels:ro" \
             as218822-bird render-bird-config
 
+      - name: Parse GRE gateway configuration
+        run: |
+          docker run --rm \
+            --env BIRD_VALIDATE=1 \
+            --volume "$PWD/routing/edge/gre-gateway/bird:/etc/bird:ro" \
+            --volume "$PWD/routing/edge/gre-gateway/tunnels:/etc/tunnels:ro" \
+            as218822-bird render-bird-config
+
       - name: Parse tunnel examples
         run: |
           docker run --rm \

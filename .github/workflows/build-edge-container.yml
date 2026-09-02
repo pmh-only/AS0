@@ -43,6 +43,16 @@ jobs:
             architecture: arm64
             platform: linux/arm64
             runner: ubuntu-24.04-arm
+          - edge: gre-gateway
+            image: as218822-gre-gateway
+            architecture: amd64
+            platform: linux/amd64
+            runner: ubuntu-24.04
+          - edge: gre-gateway
+            image: as218822-gre-gateway
+            architecture: arm64
+            platform: linux/arm64
+            runner: ubuntu-24.04-arm
     runs-on: ${{ matrix.runner }}
     steps:
       - name: Check out repository
@@ -108,6 +118,8 @@ jobs:
         include:
           - edge: vultr
             image: as218822-vultr-edge
+          - edge: gre-gateway
+            image: as218822-gre-gateway
     runs-on: ubuntu-24.04
     steps:
       - name: Download image digests

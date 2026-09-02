@@ -26,12 +26,12 @@ const jobs = {
   },
   ping: {
     timeout: 12_000,
-    validate: isHost,
+    validate: isIPv6Address,
     command: (target) => ["ping", ["-n", "-c", "4", "-W", "2", target]],
   },
   traceroute: {
     timeout: 45_000,
-    validate: isHost,
+    validate: isIPv6Address,
     command: (target) => [
       "traceroute",
       ["-n", "-m", "20", "-w", "2", "-q", "1", target],
@@ -41,22 +41,14 @@ const jobs = {
 
 function isNetwork(value) {
   const [address, prefix, extra] = value.split("/");
-  const family = isIP(address);
-  if (!family || extra !== undefined) return false;
+  if (!isIPv6Address(address) || extra !== undefined) return false;
   if (prefix === undefined) return true;
   if (!/^\d{1,3}$/.test(prefix)) return false;
-  return Number(prefix) <= (family === 4 ? 32 : 128);
+  return Number(prefix) <= 128;
 }
 
-function isHost(value) {
-  if (isIP(value)) return true;
-  if (value.length > 253 || !value.includes(".")) return false;
-  return value.split(".").every(
-    (label) =>
-      label.length > 0 &&
-      label.length <= 63 &&
-      /^[a-z\d](?:[a-z\d-]*[a-z\d])?$/i.test(label),
-  );
+function isIPv6Address(value) {
+  return isIP(value) === 6;
 }
 
 function corsHeaders(origin) {

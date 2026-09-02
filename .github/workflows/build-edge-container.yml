@@ -6,7 +6,7 @@ on:
       - ".github/workflows/build-edge-container.yml"
       - "routing/Dockerfile"
       - "routing/render-bird-config"
-      - "routing/edge/vultr/**"
+      - "routing/edge/**"
   push:
     branches:
       - main
@@ -14,7 +14,7 @@ on:
       - ".github/workflows/build-edge-container.yml"
       - "routing/Dockerfile"
       - "routing/render-bird-config"
-      - "routing/edge/vultr/**"
+      - "routing/edge/**"
 
 permissions:
   contents: read

@@ -1,0 +1,109 @@
+name: Apply PeeringDB changes
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "peeringdb/network.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: peeringdb
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install YAML parser
+        run: python -m pip install --disable-pip-version-check PyYAML==6.0.2
+
+      - name: Validate PeeringDB network
+        run: |
+          python - <<'PY'
+          import json
+
+          import yaml
+
+          with open("peeringdb/network.yml", encoding="utf-8") as network_file:
+              network = yaml.safe_load(network_file)
+
+          if not isinstance(network, dict):
+              raise ValueError("peeringdb/network.yml must contain an object")
+          identifiers = {"id": 43433, "org_id": 45151, "asn": 218822}
+          if any(network.get(field) != value for field, value in identifiers.items()):
+              raise ValueError("PeeringDB network identifiers cannot be changed")
+
+          writable_fields = {
+              "name",
+              "aka",
+              "name_long",
+              "website",
+              "social_media",
+              "looking_glass",
+              "route_server",
+              "irr_as_set",
+              "info_types",
+              "info_prefixes4",
+              "info_prefixes6",
+              "info_traffic",
+              "info_ratio",
+              "info_scope",
+              "info_unicast",
+              "info_multicast",
+              "info_ipv6",
+              "info_never_via_route_servers",
+              "notes",
+              "policy_url",
+              "policy_general",
+              "policy_locations",
+              "policy_ratio",
+              "policy_contracts",
+              "allow_ixp_update",
+              "ixp_update_exclude",
+              "status_dashboard",
+          }
+          expected_fields = writable_fields | identifiers.keys()
+          if network.keys() != expected_fields:
+              missing = sorted(expected_fields - network.keys())
+              unknown = sorted(network.keys() - expected_fields)
+              raise ValueError(f"Invalid PeeringDB fields; missing={missing}, unknown={unknown}")
+
+          with open("/tmp/peeringdb-update.json", "w", encoding="utf-8") as output_file:
+              json.dump(
+                  {
+                      field: network[field]
+                      for field in writable_fields | {"org_id", "asn"}
+                  },
+                  output_file,
+                  ensure_ascii=False,
+              )
+          PY
+
+      - name: Apply PeeringDB network changes
+        env:
+          PEERINGDB_API_KEY: ${{ secrets.PEERINGDB_API_KEY }}
+        run: |
+          test -n "$PEERINGDB_API_KEY" || {
+            echo "PEERINGDB_API_KEY repository secret is not configured" >&2
+            exit 1
+          }
+
+          curl --request PUT --fail-with-body --silent --show-error \
+            --header "Authorization: Api-Key $PEERINGDB_API_KEY" \
+            --header "Accept: application/json" \
+            --header "Content-Type: application/json" \
+            --data-binary @/tmp/peeringdb-update.json \
+            "https://www.peeringdb.com/api/net/43433" >/dev/null

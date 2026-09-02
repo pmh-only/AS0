@@ -1,0 +1,105 @@
+name: Sync PeeringDB
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "27 3 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: peeringdb
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install YAML parser
+        run: python -m pip install --disable-pip-version-check PyYAML==6.0.2
+
+      - name: Fetch PeeringDB network
+        run: |
+          curl --fail-with-body --silent --show-error \
+            --header "Accept: application/json" \
+            "https://www.peeringdb.com/api/net?asn=218822&depth=0" \
+            --output /tmp/peeringdb-network.json
+
+          python - <<'PY'
+          import json
+
+          import yaml
+
+          with open("/tmp/peeringdb-network.json", encoding="utf-8") as response_file:
+              response = json.load(response_file)
+          records = response.get("data", [])
+          if len(records) != 1:
+              raise ValueError(f"Expected one PeeringDB network, received {len(records)}")
+
+          record = records[0]
+          fields = (
+              "id",
+              "org_id",
+              "asn",
+              "name",
+              "aka",
+              "name_long",
+              "website",
+              "social_media",
+              "looking_glass",
+              "route_server",
+              "irr_as_set",
+              "info_types",
+              "info_prefixes4",
+              "info_prefixes6",
+              "info_traffic",
+              "info_ratio",
+              "info_scope",
+              "info_unicast",
+              "info_multicast",
+              "info_ipv6",
+              "info_never_via_route_servers",
+              "notes",
+              "policy_url",
+              "policy_general",
+              "policy_locations",
+              "policy_ratio",
+              "policy_contracts",
+              "allow_ixp_update",
+              "ixp_update_exclude",
+              "status_dashboard",
+          )
+          missing = set(fields) - record.keys()
+          if missing:
+              raise ValueError(f"PeeringDB response is missing fields: {sorted(missing)}")
+
+          with open("peeringdb/network.yml", "w", encoding="utf-8") as output_file:
+              yaml.safe_dump(
+                  {field: record[field] for field in fields},
+                  output_file,
+                  sort_keys=False,
+                  allow_unicode=True,
+              )
+          PY
+
+      - name: Commit PeeringDB changes
+        run: |
+          git add peeringdb/network.yml
+          if git diff --cached --quiet; then
+            echo "No PeeringDB changes detected"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Track PeeringDB changes"
+          git push

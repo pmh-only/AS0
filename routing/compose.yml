@@ -39,6 +39,8 @@ services:
       - ALL
     cap_add:
       - NET_RAW
+    group_add:
+      - "0"
     security_opt:
       - no-new-privileges:true
     depends_on:

@@ -15,8 +15,6 @@ resources:
     name: 2a06:9801:ff0::/44AS218822
   - type: route6
     name: 2a06:9801:ffa::/48AS218822
-  - type: route6
-    name: 2a06:9801:ffb::/48AS218822
   - type: aut-num
     name: AS218822
   - type: as-set

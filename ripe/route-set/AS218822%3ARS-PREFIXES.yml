@@ -10,8 +10,6 @@ objects:
         value: 2a06:9801:ff0::/44
       - name: mp-members
         value: 2a06:9801:ffa::/48
-      - name: mp-members
-        value: 2a06:9801:ffb::/48
       - link:
           href: https://rest.db.ripe.net/ripe/organisation/ORG-PMH3-RIPE
           type: locator

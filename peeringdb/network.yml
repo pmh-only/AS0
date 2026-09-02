@@ -14,7 +14,7 @@ irr_as_set: RIPE::AS218822:AS-PMHONLY
 info_types:
 - Educational/Research
 info_prefixes4: 0
-info_prefixes6: 10
+info_prefixes6: 1
 info_traffic: 100-1000Mbps
 info_ratio: Mostly Inbound
 info_scope: Asia Pacific

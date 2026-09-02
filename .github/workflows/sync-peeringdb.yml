@@ -91,9 +91,115 @@ jobs:
               )
           PY
 
+      - name: Fetch PeeringDB organization
+        run: |
+          curl --fail-with-body --silent --show-error \
+            --header "Accept: application/json" \
+            "https://www.peeringdb.com/api/org/45151?depth=0" \
+            --output /tmp/peeringdb-organization.json
+
+          python - <<'PY'
+          import json
+
+          import yaml
+
+          with open("/tmp/peeringdb-organization.json", encoding="utf-8") as response_file:
+              response = json.load(response_file)
+          records = response.get("data", [])
+          if len(records) != 1:
+              raise ValueError(f"Expected one PeeringDB organization, received {len(records)}")
+
+          record = records[0]
+          fields = (
+              "id",
+              "name",
+              "aka",
+              "name_long",
+              "website",
+              "social_media",
+              "notes",
+              "address1",
+              "address2",
+              "city",
+              "country",
+              "state",
+              "zipcode",
+              "floor",
+              "suite",
+          )
+          missing = set(fields) - record.keys()
+          if missing:
+              raise ValueError(f"PeeringDB response is missing fields: {sorted(missing)}")
+
+          with open("peeringdb/organization.yml", "w", encoding="utf-8") as output_file:
+              yaml.safe_dump(
+                  {field: record[field] for field in fields},
+                  output_file,
+                  sort_keys=False,
+                  allow_unicode=True,
+              )
+          PY
+
+      - name: Fetch PeeringDB exchange connections
+        run: |
+          curl --fail-with-body --silent --show-error \
+            --header "Accept: application/json" \
+            "https://www.peeringdb.com/api/netixlan?net_id=43433&depth=0" \
+            --output /tmp/peeringdb-netixlan.json
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          import yaml
+
+          with open("/tmp/peeringdb-netixlan.json", encoding="utf-8") as response_file:
+              records = json.load(response_file).get("data", [])
+
+          fields = (
+              "id",
+              "net_id",
+              "ixlan_id",
+              "notes",
+              "speed",
+              "asn",
+              "ipaddr4",
+              "ipaddr6",
+              "is_rs_peer",
+              "bfd_support",
+              "operational",
+              "net_side_id",
+              "ix_side_id",
+          )
+          destination = Path("peeringdb/netixlan")
+          destination.mkdir(parents=True, exist_ok=True)
+          expected_paths = set()
+
+          for record in records:
+              missing = set(fields) - record.keys()
+              if missing:
+                  raise ValueError(f"PeeringDB response is missing fields: {sorted(missing)}")
+              if record["net_id"] != 43433 or record["asn"] != 218822:
+                  raise ValueError(f"Unexpected PeeringDB network connection: {record['id']}")
+
+              resource_path = destination / f"{record['id']}.yml"
+              expected_paths.add(resource_path)
+              with resource_path.open("w", encoding="utf-8") as output_file:
+                  yaml.safe_dump(
+                      {field: record[field] for field in fields},
+                      output_file,
+                      sort_keys=False,
+                      allow_unicode=True,
+                  )
+
+          for resource_path in destination.glob("*.yml"):
+              if resource_path not in expected_paths:
+                  resource_path.unlink()
+          PY
+
       - name: Commit PeeringDB changes
         run: |
-          git add peeringdb/network.yml
+          git add peeringdb
           if git diff --cached --quiet; then
             echo "No PeeringDB changes detected"
             exit 0

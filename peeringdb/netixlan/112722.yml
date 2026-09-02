@@ -1,0 +1,13 @@
+id: 112722
+net_id: 43433
+ixlan_id: 4637
+notes: ''
+speed: 1000
+asn: 218822
+ipaddr4: null
+ipaddr6: 2a0e:8f01:1000:78::117
+is_rs_peer: true
+bfd_support: false
+operational: true
+net_side_id: null
+ix_side_id: null

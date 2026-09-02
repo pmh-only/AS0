@@ -104,9 +104,9 @@ jobs:
                       },
                       "writable_fields": {
                           "ixlan_id", "notes", "speed", "ipaddr4", "ipaddr6",
-                          "is_rs_peer", "bfd_support", "operational", "net_side_id",
-                          "ix_side_id",
+                          "is_rs_peer", "bfd_support", "operational",
                       },
+                      "read_only_fields": {"net_side_id", "ix_side_id"},
                       "payload_identifiers": {"net_id", "asn"},
                   }
               elif resource_path in resources:
@@ -124,7 +124,11 @@ jobs:
                   raise ValueError(f"PeeringDB identifiers cannot be changed: {resource_path}")
 
               writable_fields = config["writable_fields"]
-              expected_fields = writable_fields | identifiers.keys()
+              expected_fields = (
+                  writable_fields
+                  | identifiers.keys()
+                  | config.get("read_only_fields", set())
+              )
               if resource.keys() != expected_fields:
                   missing = sorted(expected_fields - resource.keys())
                   unknown = sorted(resource.keys() - expected_fields)
@@ -134,9 +138,13 @@ jobs:
 
               payload_path = Path("/tmp") / f"peeringdb-{Path(resource_path).stem}.json"
               payload_fields = writable_fields | config["payload_identifiers"]
+              payload = {field: resource[field] for field in payload_fields}
+              if config["endpoint"].startswith("netixlan/"):
+                  payload["ipaddr4"] = payload["ipaddr4"] or ""
+                  payload["ipaddr6"] = payload["ipaddr6"] or ""
               with payload_path.open("w", encoding="utf-8") as output_file:
                   json.dump(
-                      {field: resource[field] for field in payload_fields},
+                      payload,
                       output_file,
                       ensure_ascii=False,
                   )

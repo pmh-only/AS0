@@ -6,27 +6,28 @@ aka: pmh_only
 name_long: Minhyeok Park's personal lab network
 website: https://as218822.net
 social_media:
-  - service: website
-    identifier: https://as218822.net
+- service: website
+  identifier: https://as218822.net
 looking_glass: ''
 route_server: ''
 irr_as_set: RIPE::AS218822:AS-PMHONLY
 info_types:
-  - Educational/Research
+- Educational/Research
 info_prefixes4: 0
 info_prefixes6: 10
 info_traffic: 100-1000Mbps
-info_ratio: Mostly Outbound
+info_ratio: Mostly Inbound
 info_scope: Asia Pacific
 info_unicast: false
 info_multicast: false
 info_ipv6: true
 info_never_via_route_servers: false
-notes: |-
-  ## Transparency
+notes: '## Transparency
+
   This network is automated and fully opensource.
 
-  Learn more: [github.com/pmh-only/AS218822](https://github.com/pmh-only/AS218822)
+
+  Learn more: [github.com/pmh-only/AS218822](https://github.com/pmh-only/AS218822)'
 policy_url: ''
 policy_general: Open
 policy_locations: Not Required

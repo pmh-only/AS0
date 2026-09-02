@@ -4,8 +4,8 @@ aka: pmh_only
 name_long: ''
 website: https://pmh.codes
 social_media:
-  - service: website
-    identifier: https://pmh.codes
+- service: website
+  identifier: https://pmh.codes
 notes: 'Github: @pmh-only'
 address1: 207, Maeyeong-ro, Yeongtong-gu
 address2: ''

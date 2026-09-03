@@ -98,10 +98,10 @@ configure_gre() {
     done < "$config"
 
     case "$type" in
-        gre) ttl_option=ttl ;;
+        gre|gretap) ttl_option=ttl ;;
         ip6gre) ttl_option=hoplimit ;;
         *)
-            echo "GRE type must be gre or ip6gre in $config" >&2
+            echo "GRE type must be gre, gretap, or ip6gre in $config" >&2
             exit 1
             ;;
     esac

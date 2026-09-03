@@ -1,5 +1,4 @@
 ---
-import Dither from "../components/Dither.jsx";
 import LookingGlass from "../components/LookingGlass.jsx";
 import "@fontsource-variable/space-grotesk";
 
@@ -44,6 +43,29 @@ const apiUrl = import.meta.env.PUBLIC_LOOKING_GLASS_API_URL ?? "https://lg.pmh.c
         position: absolute;
         z-index: -1;
         inset: 0;
+        background:
+          radial-gradient(ellipse at 12% 95%, #b764ff 0, #7422bc 21%, transparent 54%),
+          radial-gradient(ellipse at 82% 8%, #7725c5 0, #361150 30%, transparent 62%),
+          radial-gradient(ellipse at 68% 82%, #501478 0, transparent 47%),
+          #050505;
+      }
+
+      .dither::before {
+        position: absolute;
+        inset: 0;
+        opacity: 0.42;
+        background-image:
+          repeating-linear-gradient(0deg, transparent 0 2px, rgb(0 0 0 / 38%) 2px 3px),
+          repeating-linear-gradient(90deg, transparent 0 2px, rgb(0 0 0 / 24%) 2px 3px);
+        content: "";
+        mix-blend-mode: multiply;
+      }
+
+      .dither::after {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 50% 48%, transparent 8%, rgb(0 0 0 / 52%) 100%);
+        content: "";
       }
 
       .hero h1 {
@@ -189,9 +211,7 @@ const apiUrl = import.meta.env.PUBLIC_LOOKING_GLASS_API_URL ?? "https://lg.pmh.c
   <body>
     <main>
       <section class="hero" aria-labelledby="page-title">
-        <div class="dither" aria-hidden="true">
-          <Dither client:load waveColor={[0.56, 0.21, 1]} backgroundColor={[0.02, 0.02, 0.02]} waveSpeed={0.05} waveFrequency={3} waveAmplitude={0.3} colorNum={4} pixelSize={3} enableMouseInteraction={false} mouseRadius={0.3} />
-        </div>
+        <div class="dither" aria-hidden="true"></div>
         <h1 id="page-title">AS218822</h1>
         <a class="scroll-link" href="#looking-glass">Looking glass</a>
       </section>

@@ -5,11 +5,11 @@ const policy = [
   {
     number: "01",
     title: "Who can peer",
-    body: "We welcome IPv6 peering with networks that operate a public ASN and maintain current contact and routing information.",
+    body: "We welcome IPv6 peering with networks that operate a public ASN and maintain current contact and routing information. BGP sessions are supported only through a mutually arranged tunnel or at a public peering exchange point listed for AS218822 on PeeringDB.",
     items: [
       "A current PeeringDB profile",
       "Valid route and origin objects in a public IRR",
-      "Reachability at a shared exchange or by mutual tunnel",
+      "A tunnel or listed public peering exchange point",
       "An operational NOC contact",
     ],
   },
@@ -392,7 +392,7 @@ const policy = [
       <span>AS218822 / SUWON, KR</span>
       <nav class="footer-links" aria-label="Network resources">
         <a href="/">Looking glass</a>
-        <a href="https://www.peeringdb.com/net/43433">PeeringDB</a>
+        <a href="https://www.peeringdb.com/asn/218822">PeeringDB</a>
         <a href="https://github.com/pmh-only/AS218822">Source</a>
       </nav>
     </footer>

@@ -1,0 +1,400 @@
+---
+import "@fontsource-variable/space-grotesk";
+
+const policy = [
+  {
+    number: "01",
+    title: "Who can peer",
+    body: "We welcome IPv6 peering with networks that operate a public ASN and maintain current contact and routing information.",
+    items: [
+      "A current PeeringDB profile",
+      "Valid route and origin objects in a public IRR",
+      "Reachability at a shared exchange or by mutual tunnel",
+      "An operational NOC contact",
+    ],
+  },
+  {
+    number: "02",
+    title: "What we exchange",
+    body: "Sessions use IPv6 unicast. We announce AS218822 and customer routes published under our routing objects.",
+    items: [
+      "AS-SET: RIPE::AS218822:AS-PMHONLY",
+      "ROUTE-SET: RIPE::AS218822:RS-PREFIXES",
+      "Primary aggregate: 2a06:9801:ff0::/44",
+      "No IPv4 routes",
+    ],
+  },
+  {
+    number: "03",
+    title: "How we filter",
+    body: "Routing policy is generated from public registry data. Incorrect or unsafe announcements are rejected at the edge.",
+    items: [
+      "IRR prefix and origin validation",
+      "RPKI route origin validation",
+      "Default and martian route rejection",
+      "Session-specific maximum-prefix limits",
+    ],
+  },
+  {
+    number: "04",
+    title: "Operating terms",
+    body: "AS218822 is a personal research network. Peering is provided on a best-effort basis and may change as the network evolves.",
+    items: [
+      "No minimum traffic volume or ratio",
+      "No contract required",
+      "No uptime or latency SLA",
+      "Either network may end a session at any time",
+    ],
+  },
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta
+      name="description"
+      content="Open IPv6 peering policy for AS218822"
+    />
+    <meta name="theme-color" content="#0b0710" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%238f36ff%22/><text x=%2250%22 y=%2268%22 text-anchor=%22middle%22 font-size=%2252%22 font-family=%22Arial%22 font-weight=%22700%22 fill=%22white%22>AS</text></svg>"
+    />
+    <title>Peering policy / AS218822</title>
+    <style>
+      :global(*) { box-sizing: border-box; }
+      :global(html) { overflow-x: hidden; background: #09070b; scroll-behavior: smooth; }
+      :global(body) {
+        min-width: 20rem;
+        min-height: 100%;
+        margin: 0;
+        overflow-x: hidden;
+        background: #09070b;
+        color: #f5f2f7;
+        font-family: "Space Grotesk Variable", sans-serif;
+      }
+      :global(::selection) { background: #9b45f7; color: #fff; }
+
+      .shell { width: min(100% - 4rem, 82rem); margin: 0 auto; }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 5rem;
+        border-bottom: 1px solid rgb(255 255 255 / 12%);
+      }
+
+      .brand {
+        color: #fff;
+        font-size: 0.83rem;
+        font-weight: 690;
+        letter-spacing: -0.02em;
+        text-decoration: none;
+      }
+
+      .brand span { margin-left: 0.7rem; color: #6f6a74; font-weight: 450; }
+
+      .status {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        color: #a7a1ab;
+        font: 0.61rem "SFMono-Regular", Consolas, monospace;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+      }
+
+      .status::before {
+        width: 0.42rem;
+        height: 0.42rem;
+        border-radius: 50%;
+        background: #72e3a6;
+        box-shadow: 0 0 0.8rem #72e3a6;
+        content: "";
+      }
+
+      .hero {
+        position: relative;
+        display: grid;
+        grid-template-columns: minmax(0, 1.3fr) minmax(18rem, 0.7fr);
+        gap: 5rem;
+        min-height: 37rem;
+        padding: clamp(5rem, 10vw, 9rem) 0 6rem;
+      }
+
+      .hero::after {
+        position: absolute;
+        z-index: -1;
+        top: -5rem;
+        right: -13rem;
+        width: 42rem;
+        height: 42rem;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgb(144 54 223 / 24%), transparent 68%);
+        content: "";
+        pointer-events: none;
+      }
+
+      .kicker,
+      .label,
+      .policy-number,
+      .request-meta,
+      .footer-links {
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+      }
+
+      .kicker {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        margin: 0 0 1.5rem;
+        color: #b96eff;
+        font-size: 0.66rem;
+      }
+
+      .kicker::before { width: 2rem; height: 1px; background: currentColor; content: ""; }
+
+      h1 {
+        max-width: 52rem;
+        margin: 0;
+        font-size: clamp(4.3rem, 10vw, 8.5rem);
+        font-weight: 650;
+        letter-spacing: -0.08em;
+        line-height: 0.82;
+      }
+
+      h1 span { color: #a74dff; }
+
+      .intro {
+        max-width: 38rem;
+        margin: 2.4rem 0 0;
+        color: #aaa4ae;
+        font-size: clamp(1rem, 1.5vw, 1.18rem);
+        line-height: 1.75;
+      }
+
+      .summary {
+        align-self: end;
+        border-top: 1px solid #a74dff;
+        background: rgb(255 255 255 / 2%);
+      }
+
+      .summary-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 2rem;
+        padding: 1.15rem 0;
+        border-bottom: 1px solid rgb(255 255 255 / 11%);
+      }
+
+      .label { color: #716b76; font-size: 0.59rem; }
+      .value { color: #ded9e1; font-size: 0.78rem; text-align: right; }
+
+      .policies { border-top: 1px solid rgb(255 255 255 / 12%); }
+
+      .policy {
+        display: grid;
+        grid-template-columns: 5rem minmax(12rem, 0.62fr) minmax(19rem, 1fr);
+        gap: clamp(2rem, 6vw, 6rem);
+        padding: 3.6rem 0 4rem;
+        border-bottom: 1px solid rgb(255 255 255 / 12%);
+      }
+
+      .policy-number { padding-top: 0.45rem; color: #9c48ef; font-size: 0.65rem; }
+
+      .policy h2 {
+        margin: 0;
+        font-size: clamp(2rem, 4vw, 3.25rem);
+        font-weight: 570;
+        letter-spacing: -0.06em;
+        line-height: 0.95;
+      }
+
+      .policy-body p {
+        max-width: 37rem;
+        margin: 0 0 1.6rem;
+        color: #9c96a1;
+        font-size: 0.9rem;
+        line-height: 1.7;
+      }
+
+      ul { margin: 0; padding: 0; list-style: none; }
+
+      li {
+        display: grid;
+        grid-template-columns: 0.8rem 1fr;
+        gap: 0.75rem;
+        padding: 0.72rem 0;
+        border-top: 1px solid rgb(255 255 255 / 8%);
+        color: #d7d1da;
+        font-size: 0.8rem;
+      }
+
+      li::before { color: #a74dff; content: "+"; }
+
+      .request {
+        position: relative;
+        display: grid;
+        grid-template-columns: minmax(16rem, 0.8fr) minmax(20rem, 1.2fr);
+        gap: clamp(3rem, 9vw, 9rem);
+        padding: clamp(6rem, 11vw, 10rem) 0;
+        overflow: hidden;
+      }
+
+      .request h2 {
+        max-width: 34rem;
+        margin: 0;
+        font-size: clamp(3.3rem, 7vw, 6.4rem);
+        font-weight: 620;
+        letter-spacing: -0.075em;
+        line-height: 0.88;
+      }
+
+      .request-copy { align-self: end; }
+
+      .request-copy > p {
+        max-width: 36rem;
+        margin: 0 0 2rem;
+        color: #9e98a3;
+        line-height: 1.75;
+      }
+
+      .request-meta { margin: 0 0 0.8rem; color: #706a74; font-size: 0.58rem; }
+
+      .request-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: space-between;
+        width: min(100%, 35rem);
+        padding: 1.25rem 1.35rem;
+        border: 1px solid #a34cf7;
+        background: rgb(157 66 244 / 10%);
+        color: #fff;
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: 160ms ease;
+      }
+
+      .request-link:hover { background: #963ee8; }
+      .request-link span { color: #c88cff; font-family: monospace; font-size: 1.1rem; }
+      .request-link:hover span { color: #fff; }
+
+      .request-note { margin-top: 1.2rem !important; color: #625d66 !important; font-size: 0.71rem; }
+
+      footer {
+        display: flex;
+        justify-content: space-between;
+        padding: 1.8rem 0 2.2rem;
+        border-top: 1px solid rgb(255 255 255 / 12%);
+        color: #5f5963;
+        font-size: 0.67rem;
+      }
+
+      .footer-links { display: flex; gap: 1.5rem; font-size: 0.57rem; }
+      .footer-links a { color: #817a85; text-decoration: none; }
+      .footer-links a:hover { color: #fff; }
+
+      @media (max-width: 48rem) {
+        .shell { width: min(100% - 2rem, 82rem); }
+        .hero { grid-template-columns: 1fr; gap: 4rem; padding-top: 4rem; }
+        .summary { width: min(100%, 32rem); }
+        .policy { grid-template-columns: 2.5rem 1fr; gap: 1.25rem; }
+        .policy-body { grid-column: 2; }
+        .request { grid-template-columns: 1fr; }
+      }
+
+      @media (max-width: 32rem) {
+        header { height: 4.25rem; }
+        .brand span { display: none; }
+        h1 { font-size: 21vw; }
+        .hero { min-height: 0; padding-bottom: 4rem; }
+        .policy { grid-template-columns: 1fr; padding-block: 2.8rem; }
+        .policy-number { padding: 0; }
+        .policy-body { grid-column: 1; }
+        .request { padding-block: 5rem; }
+        footer { align-items: flex-end; gap: 2rem; }
+        .footer-links { flex-direction: column; gap: 0.65rem; text-align: right; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        :global(html) { scroll-behavior: auto; }
+        .request-link { transition: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="shell">
+      <a class="brand" href="/">AS218822 <span>/ PEERING</span></a>
+      <div class="status">Open policy</div>
+    </header>
+
+    <main>
+      <section class="hero shell" aria-labelledby="page-title">
+        <div>
+          <p class="kicker">Peering policy / v1.0</p>
+          <h1 id="page-title">Let’s move <span>packets.</span></h1>
+          <p class="intro">
+            AS218822 is an open, IPv6-only research network. We peer without
+            traffic thresholds, ratio requirements, or contracts.
+          </p>
+        </div>
+        <div class="summary" aria-label="Policy summary">
+          <div class="summary-row"><span class="label">Policy</span><span class="value">Open</span></div>
+          <div class="summary-row"><span class="label">Protocol</span><span class="value">IPv6 only</span></div>
+          <div class="summary-row"><span class="label">Scope</span><span class="value">Asia Pacific</span></div>
+          <div class="summary-row"><span class="label">Traffic</span><span class="value">No minimum</span></div>
+          <div class="summary-row"><span class="label">Contract</span><span class="value">Not required</span></div>
+        </div>
+      </section>
+
+      <section class="policies" aria-label="Policy details">
+        <div class="shell">
+          {policy.map((section) => (
+            <article class="policy">
+              <span class="policy-number">/{section.number}</span>
+              <h2>{section.title}</h2>
+              <div class="policy-body">
+                <p>{section.body}</p>
+                <ul>{section.items.map((item) => <li>{item}</li>)}</ul>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section class="request shell" aria-labelledby="request-title">
+        <div>
+          <p class="kicker">Start a session</p>
+          <h2 id="request-title">Send the coordinates.</h2>
+        </div>
+        <div class="request-copy">
+          <p>
+            Include your ASN, PeeringDB profile, interconnection location,
+            IPv6 address, and expected maximum-prefix count. Tunnel proposals
+            should also include the preferred tunnel type and endpoint.
+          </p>
+          <p class="request-meta">Peering and operational contact</p>
+          <a class="request-link" href="mailto:pmh_only@pmh.codes?subject=Peering%20request%20for%20AS218822">
+            pmh_only@pmh.codes <span aria-hidden="true">-&gt;</span>
+          </a>
+          <p class="request-note">Requests are reviewed on a best-effort basis.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="shell">
+      <span>AS218822 / SUWON, KR</span>
+      <nav class="footer-links" aria-label="Network resources">
+        <a href="/">Looking glass</a>
+        <a href="https://www.peeringdb.com/net/43433">PeeringDB</a>
+        <a href="https://github.com/pmh-only/AS218822">Source</a>
+      </nav>
+    </footer>
+  </body>
+</html>

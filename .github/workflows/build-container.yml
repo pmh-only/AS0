@@ -1,15 +1,17 @@
-name: Build routing containers
+name: Build AS218822 containers
 
 on:
   pull_request:
     paths:
       - ".github/workflows/build-container.yml"
+      - "atlas/**"
       - "routing/**"
   push:
     branches:
       - main
     paths:
       - ".github/workflows/build-container.yml"
+      - "atlas/**"
       - "routing/**"
 
 permissions:
@@ -29,6 +31,18 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - component: ripe-atlas
+            image: as218822-ripe-atlas
+            context: atlas
+            architecture: amd64
+            platform: linux/amd64
+            runner: ubuntu-24.04
+          - component: ripe-atlas
+            image: as218822-ripe-atlas
+            context: atlas
+            architecture: arm64
+            platform: linux/arm64
+            runner: ubuntu-24.04-arm
           - component: bird
             image: as218822
             context: routing
@@ -114,6 +128,8 @@ jobs:
     strategy:
       matrix:
         include:
+          - component: ripe-atlas
+            image: as218822-ripe-atlas
           - component: bird
             image: as218822
           - component: looking-glass

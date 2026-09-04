@@ -1,6 +1,12 @@
 #!/bin/sh
 set -eu
 
+if [ -n "${WAIT_FOR_INTERFACE:-}" ]; then
+    until ip -6 route get 2606:4700:4700::1111 2>/dev/null | grep -q "dev ${WAIT_FOR_INTERFACE}"; do
+        sleep 1
+    done
+fi
+
 install -d -m 0770 -o ripe-atlas -g ripe-atlas /etc/ripe-atlas
 systemd-tmpfiles --create ripe-atlas.conf
 

@@ -1,6 +1,15 @@
 #!/bin/sh
 set -eu
 
+case "${SSH_ADDRESS_FAMILY:-inet}" in
+    any|inet|inet6) ;;
+    *)
+        echo "Invalid SSH_ADDRESS_FAMILY: ${SSH_ADDRESS_FAMILY}" >&2
+        exit 1
+        ;;
+esac
+sed -i "s/AddressFamily .*/AddressFamily ${SSH_ADDRESS_FAMILY:-inet}/" /etc/ssh/ssh_config.d/ripe-atlas.conf
+
 if [ -n "${WAIT_FOR_INTERFACE:-}" ]; then
     until ip -6 route get 2606:4700:4700::1111 2>/dev/null | grep -q "dev ${WAIT_FOR_INTERFACE}"; do
         sleep 1

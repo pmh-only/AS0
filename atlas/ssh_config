@@ -1,2 +1,2 @@
-Host *.prod.atlas.ripe.net *.atlas.prod.ripe.net
+Host *
     AddressFamily inet

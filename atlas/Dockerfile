@@ -14,5 +14,6 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* "${REPO_PACKAGE}" CHECKSUMS /etc/ripe-atlas
 
 COPY --chmod=0755 entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY ssh_config /etc/ssh/ssh_config.d/ripe-atlas.conf
 
 ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/entrypoint.sh"]

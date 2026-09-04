@@ -270,6 +270,7 @@ for config in "$runtime_wireguard"/*.conf; do
     validate_interface_name "$interface"
     wg-quick strip "$config" >/dev/null
     if [ "${BIRD_VALIDATE:-0}" != 1 ]; then
+        wg-quick down "$config" >/dev/null 2>&1 || true
         wg-quick up "$config"
         wireguard_configs="$config $wireguard_configs"
     fi

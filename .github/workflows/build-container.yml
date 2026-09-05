@@ -109,6 +109,22 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.component }}-${{ matrix.architecture }}
           cache-to: type=gha,mode=max,scope=${{ matrix.component }}-${{ matrix.architecture }}
 
+      - name: Test Atlas registration address families
+        if: matrix.component == 'ripe-atlas'
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+          LOCAL_IMAGE: ${{ matrix.image }}:${{ matrix.architecture }}
+          REMOTE_IMAGE: ${{ env.REGISTRY }}/pmh-only/${{ matrix.image }}
+        run: |
+          image="$LOCAL_IMAGE"
+          if [ -n "$DIGEST" ]; then image="$REMOTE_IMAGE@$DIGEST"; fi
+          for family in inet inet6 any; do
+            docker run --rm --network none --entrypoint sh \
+              --env SSH_ADDRESS_FAMILY="$family" \
+              --volume "$PWD/atlas/test-entrypoint.sh:/test-entrypoint.sh:ro" \
+              "$image" /test-entrypoint.sh
+          done
+
       - name: Export image digest
         if: github.event_name != 'pull_request'
         env:

@@ -19,6 +19,17 @@ fi
 install -d -m 0770 -o ripe-atlas -g ripe-atlas /etc/ripe-atlas
 systemd-tmpfiles --create ripe-atlas.conf
 
+# Atlas randomly selects from six entries, including literal IPv4 and IPv6
+# addresses. SSH AddressFamily alone cannot filter incompatible literals.
+. /usr/libexec/ripe-atlas/scripts/reg_servers.sh.prod
+case "${SSH_ADDRESS_FAMILY:-inet}" in
+    inet) REG_3_HOST=$REG_1_HOST; REG_6_HOST=$REG_4_HOST ;;
+    inet6) REG_2_HOST=$REG_1_HOST; REG_5_HOST=$REG_4_HOST ;;
+esac
+printf 'REG_1_HOST=%s\nREG_2_HOST=%s\nREG_3_HOST=%s\nREG_4_HOST=%s\nREG_5_HOST=%s\nREG_6_HOST=%s\n' \
+    "$REG_1_HOST" "$REG_2_HOST" "$REG_3_HOST" "$REG_4_HOST" "$REG_5_HOST" "$REG_6_HOST" \
+    > /etc/ripe-atlas/reg_servers.sh
+
 if [ ! -s /etc/ripe-atlas/probe_key ]; then
     ssh-keygen -q -t ed25519 -N '' -C "$(hostname -s)" -f /etc/ripe-atlas/probe_key
 fi

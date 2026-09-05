@@ -1,2 +1,5 @@
 Host *
     AddressFamily inet
+    ConnectTimeout 15
+    ServerAliveInterval 30
+    ServerAliveCountMax 3

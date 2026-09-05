@@ -8,6 +8,10 @@ const port = Number.parseInt(process.env.LG_PORT ?? "8080", 10);
 const location = process.env.LG_LOCATION ?? "core";
 const birdSocket = process.env.LG_BIRD_SOCKET ?? "/run/bird/bird.ctl";
 const trustProxy = process.env.LG_TRUST_PROXY === "1";
+const queriesEnabled = process.env.LG_ENABLE_QUERIES !== "0";
+const metricsPort = Number.parseInt(process.env.LG_METRICS_PORT ?? "9003", 10);
+const disabledProtocols = new Set((process.env.LG_DISABLED_PROTOCOLS ?? "").split(","));
+const probeTargets = (process.env.LG_PROBE_TARGETS ?? "").split(",").filter(Boolean);
 const allowedOrigins = new Set(
   (process.env.LG_ALLOWED_ORIGINS ?? "https://as218822.net,https://www.as218822.net")
     .split(",")
@@ -15,6 +19,9 @@ const allowedOrigins = new Set(
     .filter(Boolean),
 );
 const requests = new Map();
+let activeJobs = 0;
+let statusPromise;
+let statusExpires = 0;
 
 const jobs = {
   route: {
@@ -49,7 +56,7 @@ function isNetwork(value) {
 }
 
 function isIPv6Address(value) {
-  return isIP(value) === 6;
+  return !value.includes("%") && isIP(value) === 6;
 }
 
 function isHostname(value) {
@@ -80,8 +87,12 @@ async function resolveRouteTarget(value) {
 }
 
 async function resolveHostTarget(value) {
-  if (isIPv6Address(value)) return value;
-  return resolveHostname(value);
+  const address = isIPv6Address(value) ? value : await resolveHostname(value);
+  const first = Number.parseInt(address.split(":", 1)[0], 16);
+  if (first < 0x2000 || first > 0x3fff || !Number.isFinite(first)) {
+    throw new Error("Only public IPv6 destinations are allowed");
+  }
+  return address;
 }
 
 function corsHeaders(origin) {
@@ -105,10 +116,15 @@ function respond(response, status, body, headers = {}) {
 
 function rateLimited(address) {
   const now = Date.now();
+  for (const [key, times] of requests) {
+    if (now - times.at(-1) >= 60_000) requests.delete(key);
+  }
+  if (!requests.has(address) && requests.size >= 4096) return true;
   const recent = (requests.get(address) ?? []).filter((time) => now - time < 60_000);
+  if (recent.length >= 20) return true;
   recent.push(now);
   requests.set(address, recent);
-  return recent.length > 20;
+  return false;
 }
 
 function clientAddress(request) {
@@ -118,6 +134,7 @@ function clientAddress(request) {
     typeof forwarded === "string" &&
     (trustProxy || peer === "127.0.0.1" || peer === "::1" || peer === "::ffff:127.0.0.1")
   ) {
+    // The edge nginx replaces X-Forwarded-For before Envoy appends its hop.
     return forwarded.split(",", 1)[0].trim();
   }
   return peer;
@@ -163,6 +180,23 @@ function run(command, args, timeout) {
   });
 }
 
+function routingStatus() {
+  if (statusPromise && Date.now() < statusExpires) return statusPromise;
+  statusExpires = Date.now() + 10_000;
+  statusPromise = run("birdc", ["-r", "-s", birdSocket, "show protocols"], 5_000)
+    .then((result) => {
+      if (result.code !== 0 || !result.output.includes("Name")) throw new Error("BIRD is unavailable");
+      const protocols = result.output.split("\n").flatMap((line) => {
+        const match = line.match(/^(\w+)\s+(BGP|RPKI|Kernel)\s+\S+\s+(\w+)\s+(.+)$/);
+        if (!match) return [];
+        return [{ name: match[1], type: match[2], up: match[3] === "up", disabled: /\bDisabled\b/i.test(match[4]) }];
+      });
+      return { available: true, protocols };
+    })
+    .catch(() => ({ available: false, protocols: [] }));
+  return statusPromise;
+}
+
 const server = createServer(async (request, response) => {
   const origin = request.headers.origin;
   const cors = corsHeaders(origin);
@@ -173,11 +207,16 @@ const server = createServer(async (request, response) => {
     return response.end();
   }
 
-  if (request.method === "GET" && request.url === "/health") {
+  if (request.method === "GET" && request.url === "/live") {
     return respond(response, 200, { status: "ok", location });
   }
+  if (request.method === "GET" && request.url === "/health") {
+    const state = await routingStatus();
+    const healthy = state.available && state.protocols.some((peer) => peer.type === "BGP" && peer.up);
+    return respond(response, healthy ? 200 : 503, { status: healthy ? "ok" : "unavailable", location });
+  }
 
-  if (request.method !== "POST" || request.url !== "/api/query") {
+  if (!queriesEnabled || request.method !== "POST" || request.url !== "/api/query") {
     return respond(response, 404, { error: "Not found" }, cors);
   }
   if (origin && !allowedOrigins.has(origin)) {
@@ -189,18 +228,28 @@ const server = createServer(async (request, response) => {
   if (rateLimited(clientAddress(request))) {
     return respond(response, 429, { error: "Rate limit exceeded" }, cors);
   }
+  if (activeJobs >= 8) return respond(response, 503, { error: "Query capacity exceeded" }, cors);
+  activeJobs++;
 
   try {
     const body = await readJson(request);
-    const job = jobs[body.type];
-    const target = typeof body.target === "string" ? body.target.trim() : "";
+    const job = Object.hasOwn(jobs, body?.type) ? jobs[body.type] : undefined;
+    const target = typeof body?.target === "string" ? body.target.trim() : "";
     if (!job || !target) {
       return respond(response, 400, { error: "Invalid query type or target" }, cors);
     }
 
     let queryTarget;
     try {
-      queryTarget = await job.resolve(target);
+      let timer;
+      try {
+        queryTarget = await Promise.race([
+          job.resolve(target),
+          new Promise((_, reject) => { timer = setTimeout(() => reject(new Error("DNS resolution timed out")), 5_000); }),
+        ]);
+      } finally {
+        clearTimeout(timer);
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : "Invalid query target";
       return respond(response, 400, { error: message }, cors);
@@ -222,9 +271,40 @@ const server = createServer(async (request, response) => {
   } catch (error) {
     const message = error instanceof Error ? error.message : "Query failed";
     return respond(response, error instanceof SyntaxError ? 400 : 500, { error: message }, cors);
+  } finally {
+    activeJobs--;
   }
 });
 
+server.requestTimeout = 15_000;
+server.headersTimeout = 10_000;
 server.listen(port, host, () => {
   console.log(`Looking glass listening on http://${host}:${port}`);
 });
+
+createServer(async (request, response) => {
+  if (request.url !== "/metrics") return respond(response, 404, { error: "Not found" });
+  const state = await routingStatus();
+  const labels = `location=${JSON.stringify(location)}`;
+  const lines = [
+    "# TYPE as218822_bird_up gauge",
+    `as218822_bird_up{${labels}} ${Number(state.available)}`,
+    "# TYPE as218822_protocol_up gauge",
+    ...state.protocols.filter((peer) => !peer.disabled && !disabledProtocols.has(peer.name)).map((peer) =>
+      `as218822_protocol_up{${labels},protocol=${JSON.stringify(peer.name)},type=${JSON.stringify(peer.type)}} ${Number(peer.up)}`),
+  ];
+  if (probeTargets.length) {
+    lines.push("# TYPE as218822_ipv6_reachable gauge");
+    const probes = await Promise.all(probeTargets.map(async (target) => {
+      try {
+        const result = await run("ping", ["-6", "-n", "-c", "1", "-W", "2", target], 3_000);
+        return `as218822_ipv6_reachable{${labels},target=${JSON.stringify(target)}} ${Number(result.code === 0)}`;
+      } catch {
+        return `as218822_ipv6_reachable{${labels},target=${JSON.stringify(target)}} 0`;
+      }
+    }));
+    lines.push(...probes);
+  }
+  response.writeHead(200, { "content-type": "text/plain; version=0.0.4" });
+  response.end(`${lines.join("\n")}\n`);
+}).listen(metricsPort, host);

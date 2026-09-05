@@ -1,6 +1,7 @@
 name: Validate BIRD configuration
 
 on:
+  workflow_call:
   pull_request:
     paths:
       - ".github/workflows/validate-bird.yml"
@@ -27,6 +28,18 @@ jobs:
 
       - name: Build looking glass image
         run: docker build --tag as218822-looking-glass routing/looking-glass
+
+      - name: Test looking glass health and input boundaries
+        run: |
+          docker run --rm --network none \
+            --volume "$PWD/routing/looking-glass/server.test.mjs:/tests/server.test.mjs:ro" \
+            --entrypoint node as218822-looking-glass --test /tests/server.test.mjs
+
+      - name: Test import policy and RPKI rejection
+        run: |
+          docker run --rm --network none \
+            --volume "$PWD/routing/tests:/tests:ro" \
+            as218822-bird sh /tests/policy.sh
 
       - name: Parse tracked configuration
         run: |

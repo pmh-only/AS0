@@ -1,7 +1,7 @@
 FROM dotenv/dotenvx@sha256:480318495159b1570a6c0072ea81ae050d06ad46ba267e0a7c7487b43e6ed285 AS dotenvx
 FROM zerotier/zerotier@sha256:4d0542fa43f4ffaac4e702eb89d3ba6c6c4e6736fdd253b1249cae1a54e8ff97 AS zerotier
 
-FROM debian:bookworm-slim
+FROM debian:trixie-slim
 
 ARG CONFIG_ROOT=.
 
@@ -17,6 +17,7 @@ RUN ln -s zerotier-one /usr/sbin/zerotier-cli \
     && ln -s zerotier-one /usr/sbin/zerotier-idtool
 COPY ${CONFIG_ROOT}/bird /etc/bird
 COPY ${CONFIG_ROOT}/tunnels /etc/tunnels
+COPY policy.conf /etc/bird-policy.conf
 COPY --chmod=0755 render-bird-config /usr/local/bin/render-bird-config
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \

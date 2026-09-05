@@ -112,6 +112,18 @@ configure_gre() {
 
     [ "${BIRD_VALIDATE:-0}" = 1 ] && return
 
+    # A SIGKILL can leave our named tunnel behind in a host network namespace.
+    if ip link show dev "$interface" >/dev/null 2>&1; then
+        existing_type=$(ip -d -j link show dev "$interface")
+        case "$existing_type" in
+            *\"info_kind\":\"$type\"*) ;;
+            *)
+                echo "Refusing to replace non-$type interface: $interface" >&2
+                exit 1
+                ;;
+        esac
+        ip link delete "$interface"
+    fi
     ip link add "$interface" type "$type" \
         local "$local_address" remote "$remote_address" "$ttl_option" "$ttl"
     gre_interfaces="$interface $gre_interfaces"

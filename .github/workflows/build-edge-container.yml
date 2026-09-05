@@ -6,6 +6,8 @@ on:
       - ".github/workflows/build-edge-container.yml"
       - "routing/Dockerfile"
       - "routing/render-bird-config"
+      - "routing/policy.conf"
+      - ".github/workflows/validate-bird.yml"
       - "routing/edge/**"
   push:
     branches:
@@ -14,6 +16,8 @@ on:
       - ".github/workflows/build-edge-container.yml"
       - "routing/Dockerfile"
       - "routing/render-bird-config"
+      - "routing/policy.conf"
+      - ".github/workflows/validate-bird.yml"
       - "routing/edge/**"
 
 permissions:
@@ -28,7 +32,11 @@ env:
   REGISTRY: ghcr.io
 
 jobs:
+  validate:
+    uses: ./.github/workflows/validate-bird.yml
+
   build:
+    needs: validate
     strategy:
       fail-fast: false
       matrix:
